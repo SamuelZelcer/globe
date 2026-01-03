@@ -13,6 +13,7 @@ type Service interface {
 	SignUp(request *dtos.SignUpRequest) (*string, error)
 	Verification(request *dtos.VerifyUserRequest, token *string) error
 	GetNewCode(token *string) error
+	SendCodeAgain(tokne *string) error
 }
 
 type service struct {

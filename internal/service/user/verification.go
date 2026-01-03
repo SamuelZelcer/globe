@@ -87,3 +87,21 @@ func (s *service) GetNewCode(token *string) error {
 	go s.email.SendVerificationCode(&newCode, &claims.Subject)
 	return nil
 }
+
+func (s *service) SendCodeAgain(token *string) error {
+	// get claims and validate token
+	claims, err := s.jwtManager.VerifyAndGetClaims(token)
+	if err != nil {
+		return errors.New("Invalid token")
+	}
+
+	// find usesr code
+	var code string
+	if err := s.unverifiedUserRepository.FindCodeByID(&claims.UserID, &code); err != nil {
+		return errors.New("Couldn't find user's verification code")
+	}
+
+	// send verification ode again
+	go s.email.SendVerificationCode(&code, &claims.Subject)
+	return nil
+}

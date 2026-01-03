@@ -10,6 +10,7 @@ type Handler interface {
 	SignUp(ctx echo.Context) error
 	Verification(ctx echo.Context) error
 	GetNewCode(ctx echo.Context) error
+	SendCodeAgain(ctx echo.Context) error
 }
 
 type handler struct {
