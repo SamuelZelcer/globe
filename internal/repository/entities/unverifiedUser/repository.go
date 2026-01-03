@@ -13,6 +13,7 @@ type Repository interface {
 	IsUsernameOrEmailAlreadyInUse(username *string, email *string) bool
 	FindByID(ID *uint32, user *UnverifiedUser) error
 	DeleteByID(ID *uint32) error
+	UpdateVerificationCode(ID *uint32, code *string) error
 }
 
 type repository struct {
@@ -49,4 +50,8 @@ func (r *repository) FindByID(ID *uint32, user *UnverifiedUser) error {
 
 func (r *repository) DeleteByID(ID *uint32) error {
 	return r.DB.Delete(&UnverifiedUser{}, " id = ?", ID).Error
+}
+
+func (r *repository) UpdateVerificationCode(ID *uint32, newCode *string) error {
+	return r.DB.Model(&UnverifiedUser{}).Where("id = ?", ID).Update("code", &newCode).Error
 }

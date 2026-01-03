@@ -41,6 +41,7 @@ func main() {
     
     e.POST("/user/sign-up", userHandler.SignUp)
     e.POST("/user/verification", userHandler.Verification)
+    e.POST("/user/verification/get-new-code", userHandler.GetNewCode)
 
     e.Start("127.0.0.1:8080")
 }

@@ -55,7 +55,7 @@ func (s *service) SignUp(request *dtos.SignUpRequest) (*string, error) {
 		Username: request.Username,
 		Email: request.Email,
 		Password: hashedPassword,
-		Expired: time.Now().Add(time.Minute * 20),
+		Expired: time.Now().Add(time.Minute * 15),
 		Code: strconv.Itoa(rand.Intn(900000) + 100000),
 	}
 
@@ -69,7 +69,7 @@ func (s *service) SignUp(request *dtos.SignUpRequest) (*string, error) {
 	}
 
 	// generate jwt token with username and ID
-	token, err := s.jwtManager.Create(userID, &user.Username, time.Minute*15)
+	token, err := s.jwtManager.Create(userID, &user.Email, time.Minute*15)
 	if err != nil {
 		return nil, errors.New("Couldn't generate jwt token")
 	}

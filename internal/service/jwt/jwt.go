@@ -30,10 +30,10 @@ func Init() Manager {
 	}
 }
 
-func (m *manager) Create(userID *uint32, username *string, duration time.Duration) (*string, error) {
+func (m *manager) Create(userID *uint32, email *string, duration time.Duration) (*string, error) {
 	unsignedToken := jwt.NewWithClaims(
 		jwt.SigningMethodES256,
-		InitUserClaims(userID, username, &duration),
+		InitUserClaims(userID, email, &duration),
 	)
 	token, err := unsignedToken.SignedString(m.privateKey)
 	if err != nil {
