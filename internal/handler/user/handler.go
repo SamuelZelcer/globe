@@ -8,6 +8,7 @@ import (
 
 type Handler interface {
 	SignUp(ctx echo.Context) error
+	Verification(ctx echo.Context) error
 }
 
 type handler struct {

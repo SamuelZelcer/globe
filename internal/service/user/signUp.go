@@ -19,12 +19,12 @@ func (s *service) SignUp(request *dtos.SignUpRequest) (*string, error) {
 
 	// validate request
 	if request.Username == "" ||
-	   request.Email == "" ||
-	   request.Password == "" ||
-	   len(request.Username) < 4 ||
-	   len(request.Username) > 60 ||
-	   len(request.Password) < 8 ||
-	   len(request.Password) > 120 {
+	request.Email == "" ||
+    request.Password == "" ||
+	len(request.Username) < 4 ||
+	len(request.Username) > 60 ||
+	len(request.Password) < 8 ||
+	len(request.Password) > 120 {
 	    return nil, errors.New("Bad request")
 	}
 
@@ -35,9 +35,7 @@ func (s *service) SignUp(request *dtos.SignUpRequest) (*string, error) {
 
 	// validate username
 	matched, err := regexp.MatchString(`[!@#$%^&*()]`, request.Username)
-	if err != nil {
-		return nil, errors.New("Couldn't validate username")
-	} else if matched {
+	if err != nil || matched {
 		return nil, errors.New("Invalid username")
 	}
 
@@ -62,7 +60,7 @@ func (s *service) SignUp(request *dtos.SignUpRequest) (*string, error) {
 	}
 
 	// send email with verification code
-	go s.email.SendVerificationCode( &user.Code, &request.Email)
+	go s.email.SendVerificationCode(&user.Code, &request.Email)
 
 	// create unverified user and get his ID
 	userID, err := s.unverifiedUserRepository.Create(&user)
@@ -71,7 +69,7 @@ func (s *service) SignUp(request *dtos.SignUpRequest) (*string, error) {
 	}
 
 	// generate jwt token with username and ID
-	token, err := s.jwtManager.Create(&userID, &user.Username, time.Minute*15)
+	token, err := s.jwtManager.Create(userID, &user.Username, time.Minute*15)
 	if err != nil {
 		return nil, errors.New("Couldn't generate jwt token")
 	}
