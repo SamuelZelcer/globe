@@ -1,9 +1,12 @@
 package userService
 
 import (
+	"context"
 	"globe/internal/repository/dtos"
+	"globe/internal/repository/entities/refreshToken"
 	"globe/internal/repository/entities/unverifiedUser"
 	"globe/internal/repository/entities/user"
+	"globe/internal/repository/redis"
 	"globe/internal/repository/transactions"
 	"globe/internal/service/email"
 	JWT "globe/internal/service/jwt"
@@ -14,6 +17,7 @@ type Service interface {
 	Verification(request *dtos.VerifyUserRequest, token *string) error
 	GetNewCode(token *string) error
 	SendCodeAgain(tokne *string) error
+	SignIn(request *dtos.SignInRequest, ctx context.Context) (*dtos.AuthenticationTokens, error)
 }
 
 type service struct {
@@ -22,6 +26,8 @@ type service struct {
 	email email.Email
 	jwtManager JWT.Manager
 	transactions transactions.Transactions
+	redis redis.Repository
+	refreshTokenRepository refreshToken.Repository
 }
 
 func Init(
@@ -30,6 +36,8 @@ func Init(
 	email email.Email,
 	jwtManager JWT.Manager,
 	transactions transactions.Transactions,
+	redis redis.Repository,
+	refreshTokenRepository refreshToken.Repository,
 ) Service {
 	return &service{
 		userRepository: userRepository,
@@ -37,5 +45,7 @@ func Init(
 		email: email,
 		jwtManager: jwtManager,
 		transactions: transactions,
+		redis: redis,
+		refreshTokenRepository: refreshTokenRepository,
 	}
 }

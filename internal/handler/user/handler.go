@@ -11,6 +11,7 @@ type Handler interface {
 	Verification(ctx echo.Context) error
 	GetNewCode(ctx echo.Context) error
 	SendCodeAgain(ctx echo.Context) error
+	SignIn(ctx echo.Context) error
 }
 
 type handler struct {

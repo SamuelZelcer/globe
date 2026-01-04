@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"globe/internal/repository/entities/refreshToken"
 	"globe/internal/repository/entities/unverifiedUser"
 	"globe/internal/repository/entities/user"
 	"log"
@@ -32,6 +33,7 @@ func InitDB() *gorm.DB {
 	if err := DB.AutoMigrate(
 		&user.User{},
 		&unverifiedUser.UnverifiedUser{},
+		&refreshToken.RefreshToken{},
 	); err != nil {
 		log.Fatalf("Couldn't migrate tables %v\n", err)
 	}
@@ -41,6 +43,11 @@ func InitDB() *gorm.DB {
 	"CYCLE "+
 	"CACHE 20")
 	DB.Exec("ALTER SEQUENCE users_id_seq "+
+	"INCREMENT BY 1 "+
+	"START WITH 100001 "+
+	"CYCLE "+
+	"CACHE 20")
+	DB.Exec("ALTER SEQUENCE refresh_tokens_id_seq "+
 	"INCREMENT BY 1 "+
 	"START WITH 100001 "+
 	"CYCLE "+
