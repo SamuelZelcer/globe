@@ -1,6 +1,7 @@
 package main
 
 import (
+	refreshTokenHandler "globe/internal/handler/refreshToken"
 	userHandler "globe/internal/handler/user"
 	"globe/internal/repository"
 	"globe/internal/repository/entities/refreshToken"
@@ -10,6 +11,7 @@ import (
 	"globe/internal/repository/transactions"
 	"globe/internal/service/email"
 	JWT "globe/internal/service/jwt"
+	refreshTokenService "globe/internal/service/refreshToken"
 	userService "globe/internal/service/user"
 
 	"github.com/labstack/echo/v4"
@@ -33,6 +35,12 @@ func main() {
     email := email.InitEmail()
     jwtManager := JWT.Init()
 
+    refreshTokenService := refreshTokenService.Init(
+        refreshTokenRepository,
+        userRepository,
+        jwtManager,
+        redisRepository,
+    )
     userService := userService.Init(
         userRepository,
         unverifiedUserRepository,
@@ -45,6 +53,7 @@ func main() {
 
     // handler
     userHandler := userHandler.Init(userService)
+    refreshTokenHandler := refreshTokenHandler.Init(refreshTokenService)
     
     e := echo.New()
     e.Use(middleware.RequestLogger())
@@ -56,6 +65,8 @@ func main() {
     e.POST("/user/verification/get-new-code", userHandler.GetNewCode)
     e.POST("/user/verification/send-code-again", userHandler.SendCodeAgain)
     e.POST("/user/sign-in", userHandler.SignIn)
+
+    e.POST("/auth/refresh-token/update", refreshTokenHandler.Update)
 
     e.Start("127.0.0.1:8080")
 }

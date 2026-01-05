@@ -37,7 +37,7 @@ func (h *handler) GetNewCode(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid authorization header"})
 	}
 	if err := h.service.GetNewCode(&splitAuthHeader[1]); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Couldn't generate new verification code"})
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, "new verification code was generated")
 }
@@ -52,7 +52,7 @@ func (h *handler) SendCodeAgain(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid authorization header"})
 	}
 	if err := h.service.SendCodeAgain(&splitAuthHeader[1]); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Couldn't send verification code again"})
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, "email with verification code was sent again")
 }

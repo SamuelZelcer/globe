@@ -14,7 +14,7 @@ func (h *handler) SignIn(ctx echo.Context) error {
 	}
 	authenticationTokens, err := h.service.SignIn(request, ctx.Request().Context())
 	if err != nil || authenticationTokens == nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Couldn't sign in"})
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"refreshToken" : *authenticationTokens.RefreshToken,

@@ -11,7 +11,8 @@ import (
 
 type Manager interface {
 	Create(userID *uint32, username *string, duration time.Duration) (*string, error)
-	VerifyAndGetClaims(tokenStr *string) (*UserClaims, error)
+	Validate(tokenStr *string) (*UserClaims, error)
+	ValidateWithoutExpiration(tokenStr *string) (*UserClaims, error)
 }
 
 type manager struct {
@@ -42,7 +43,7 @@ func (m *manager) Create(userID *uint32, email *string, duration time.Duration) 
 	return &token, nil
 }
 
-func (m *manager) VerifyAndGetClaims(tokenStr *string) (*UserClaims, error) {
+func (m *manager) Validate(tokenStr *string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(*tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, errors.New("Invalid token signing method")
@@ -54,7 +55,24 @@ func (m *manager) VerifyAndGetClaims(tokenStr *string) (*UserClaims, error) {
 	}
 	claims, ok := token.Claims.(*UserClaims)
 	if !ok {
-		return claims, errors.New("Invalid token claims")
+		return nil, errors.New("Invalid token claims")
+	}
+	return claims, nil
+}
+
+func (m *manager) ValidateWithoutExpiration(tokenStr *string) (*UserClaims, error) {
+	token, err := jwt.ParseWithClaims(*tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+			return nil, errors.New("Invalid token signing method")
+		}
+		return m.publicKey, nil
+	})
+	if err != nil && err != jwt.ErrTokenExpired {
+		return nil, err
+	}
+	claims, ok := token.Claims.(*UserClaims)
+	if !ok {
+		return nil, errors.New("Invalid token claims")
 	}
 	return claims, nil
 }

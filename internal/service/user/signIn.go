@@ -24,7 +24,7 @@ func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dto
 
 	// validate email
 	if _, err := mail.ParseAddress(request.Email); err != nil {
-		return nil, errors.New("Bad request")
+		return nil, errors.New("Invalid email")
 	}
 
 	// find user
@@ -51,7 +51,7 @@ func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dto
 	}
 
 	// save refresh token to redis
-	if err := s.redis.SaveRefreshToken(ctx, &refreshToken, time.Minute*6); err != nil {
+	if err := s.redis.SetRefreshToken(ctx, &refreshToken, time.Hour*24); err != nil {
 		return nil, errors.New("Couldn't store refresh token in redis")
 	}
 

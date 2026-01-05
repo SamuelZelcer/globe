@@ -16,10 +16,10 @@ func (s *service) Verification(request *dtos.VerifyUserRequest, token *string) e
 		return errors.New("Bad request")
 	}
 
-	// verify token and get user claims
-	claims, err := s.jwtManager.VerifyAndGetClaims(token)
+	// validate token and get user claims
+	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
-		return err
+		return errors.New("Couldn't validate token")
 	}
 
 	// find unverified user bi ID
@@ -53,25 +53,25 @@ func (s *service) Verification(request *dtos.VerifyUserRequest, token *string) e
 	// delete unverified user
 	if err := s.unverifiedUserRepository.DeleteByID(&unverifiedUser.ID); err != nil {
 		tx.Rollback()
-		return err
+		return errors.New("Couldn't delete unverified user")
 	}
 
 	// create user
 	if err := s.userRepository.Create(&user); err != nil {
 		tx.Rollback()
-		return err
+		return errors.New("Couldn't create user")
 	}
 
 	// commit transaction
 	if err := s.transactions.CommitTransaction(tx); err != nil {
-		return err
+		return errors.New("Couldn't commit transaction")
 	}
 	return nil
 }
 
 func (s *service) GetNewCode(token *string) error {
 	// get claims and validate token
-	claims, err := s.jwtManager.VerifyAndGetClaims(token)
+	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
 		return errors.New("Invalid token")
 	}
@@ -90,7 +90,7 @@ func (s *service) GetNewCode(token *string) error {
 
 func (s *service) SendCodeAgain(token *string) error {
 	// get claims and validate token
-	claims, err := s.jwtManager.VerifyAndGetClaims(token)
+	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
 		return errors.New("Invalid token")
 	}

@@ -4,3 +4,7 @@ type AuthenticationTokens struct {
 	RefreshToken *string
 	AccessToken *string
 }
+
+type UpdateAuthTokensRequest struct {
+	RefreshToken *string
+}
