@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *handler) Create(ctx echo.Context) error {
+func (h *handler) Delete(ctx echo.Context) error {
 	authHeader := ctx.Request().Header.Get("Authorization")
 	if authHeader == "" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Missing authorization header"})
@@ -17,12 +17,12 @@ func (h *handler) Create(ctx echo.Context) error {
 	if len(splitAuthHeader) != 2 || splitAuthHeader[0] != "Bearer" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid authorization header"})
 	}
-	request := &dtos.CreateProductRequest{}
+	request := &dtos.DeleteProductRequest{}
 	if err := ctx.Bind(request); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Bad request"})
 	}
-	if err := h.service.Create(request, &splitAuthHeader[1]); err != nil {
+	if err := h.service.Delete(request, &splitAuthHeader[1]); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	return ctx.JSON(http.StatusOK, "Product was created")
+	return ctx.JSON(http.StatusOK, "Product was delete")
 }

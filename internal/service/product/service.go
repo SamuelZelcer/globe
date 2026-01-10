@@ -13,6 +13,7 @@ import (
 type Service interface {
 	Create(request *dtos.CreateProductRequest, token *string) error
 	Update(request *dtos.UpdateProductRequest, token *string) (*dtos.UpdateProductResponse, error)
+	Delete(request *dtos.DeleteProductRequest, token *string) error
 }
 
 type service struct {

@@ -18,3 +18,7 @@ type UpdateProductResponse struct {
 	Price *string
 	Description *string
 }
+
+type DeleteProductRequest struct {
+	ProductID *uint32 `json:"productID"`
+}

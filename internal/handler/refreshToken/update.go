@@ -27,7 +27,7 @@ func (h *handler) Update(ctx echo.Context) error {
 		&splitAuthHeader[1],
 	)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"refreshToken": *tokens.RefreshToken,

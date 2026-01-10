@@ -22,7 +22,7 @@ func (h *handler) Verification(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Bad request"})
 	}
 	if err := h.service.Verification(request, &splitAuthHeader[1]); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, "User was successfully created")
 }
