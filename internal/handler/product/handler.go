@@ -8,6 +8,7 @@ import (
 
 type Handler interface {
 	Create(ctx echo.Context) error
+	Update(ctx echo.Context) error
 }
 
 type handler struct {

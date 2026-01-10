@@ -7,7 +7,8 @@ import (
 )
 
 type Repository interface {
-	Create(product *entities.Product) error
+	Save(product *entities.Product) error
+	FindByID(ID *uint32, product *entities.Product) error
 }
 
 type repository struct {
@@ -18,6 +19,10 @@ func InitRepository(DB *gorm.DB) Repository {
 	return &repository{DB: DB}
 }
 
-func (r *repository) Create(product *entities.Product) error {
-	return r.DB.Create(product).Error
+func (r *repository) Save(product *entities.Product) error {
+	return r.DB.Save(product).Error
+}
+
+func (r *repository) FindByID(ID *uint32, product *entities.Product) error {
+	return r.DB.Find(product, "id = ?", ID).Error
 }

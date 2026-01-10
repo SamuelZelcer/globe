@@ -7,7 +7,7 @@ import (
 )
 
 type Repository interface {
-	Create(refreshtoken *entities.RefreshToken) error
+	Save(refreshtoken *entities.RefreshToken) error
 	FindByID(ID *uint32, refreshToken *entities.RefreshToken) error
 }
 
@@ -19,7 +19,7 @@ func InitRepository(DB *gorm.DB) Repository {
 	return &repository{DB: DB}
 }
 
-func (r *repository) Create(refreshtoken *entities.RefreshToken) error {
+func (r *repository) Save(refreshtoken *entities.RefreshToken) error {
 	return r.DB.Save(refreshtoken).Error
 }
 

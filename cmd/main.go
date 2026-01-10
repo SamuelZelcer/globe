@@ -82,6 +82,7 @@ func main() {
     e.POST("/auth/refresh-token/update", refreshTokenHandler.Update)
 
     e.POST("/product/create", productHandler.Create)
+    e.POST("product/update", productHandler.Update)
 
     e.Start("127.0.0.1:8080")
 }

@@ -53,7 +53,7 @@ func (s *service) Update(
 	if err := s.redis.SetRefreshToken(ctx, newRefreshToken, time.Hour*24); err != nil {
 		return nil, errors.New("Couldn't save refresh token to redis")
 	}
-	if err := s.refreshTokenRepository.Create(newRefreshToken); err != nil {
+	if err := s.refreshTokenRepository.Save(newRefreshToken); err != nil {
 		return nil, errors.New("Couldn't save refresh token to DB")
 	}
 

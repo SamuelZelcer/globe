@@ -12,6 +12,7 @@ import (
 
 type Service interface {
 	Create(request *dtos.CreateProductRequest, token *string) error
+	Update(request *dtos.UpdateProductRequest, token *string) (*dtos.UpdateProductResponse, error)
 }
 
 type service struct {

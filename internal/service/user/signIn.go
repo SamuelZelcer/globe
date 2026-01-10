@@ -47,7 +47,7 @@ func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dto
 	}
 
 	// save refresh token to DB
-	if err := s.refreshTokenRepository.Create(refreshToken); err != nil {
+	if err := s.refreshTokenRepository.Save(refreshToken); err != nil {
 		return nil, errors.New("Couldn't create refresh token")
 	}
 
