@@ -67,7 +67,7 @@ func (m *manager) ValidateWithoutExpiration(tokenStr *string) (*UserClaims, erro
 		}
 		return m.publicKey, nil
 	})
-	if err != nil && err != jwt.ErrTokenExpired {
+	if err != nil && err != jwt.ErrTokenExpired && err.Error() != "token has invalid claims: token is expired"{
 		return nil, err
 	}
 	claims, ok := token.Claims.(*UserClaims)

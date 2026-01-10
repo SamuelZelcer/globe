@@ -6,5 +6,5 @@ type AuthenticationTokens struct {
 }
 
 type UpdateAuthTokensRequest struct {
-	RefreshToken *string
+	RefreshToken *string `json:"refreshToken"`
 }

@@ -1,7 +1,7 @@
 package unverifiedUser
 
 import (
-	"globe/internal/repository/entities/user"
+	"globe/internal/repository/entities"
 	"time"
 
 	"gorm.io/gorm"
@@ -9,9 +9,9 @@ import (
 
 type Repository interface {
 	DeleteExpiredUsers(now time.Time)
-	Create(user *UnverifiedUser) (*uint32, error)
+	Create(user *entities.UnverifiedUser) (*uint32, error)
 	IsUsernameOrEmailAlreadyInUse(username *string, email *string) bool
-	FindByID(ID *uint32, user *UnverifiedUser) error
+	FindByID(ID *uint32, user *entities.UnverifiedUser) error
 	DeleteByID(ID *uint32) error
 	UpdateVerificationCode(ID *uint32, code *string) error
 	FindCodeByID(ID *uint32, code *string) error
@@ -26,10 +26,10 @@ func InitRepository(DB *gorm.DB) Repository {
 }
 
 func (r *repository) DeleteExpiredUsers(now time.Time) {
-	r.DB.Delete(&UnverifiedUser{}, "expired < ?", now)
+	r.DB.Delete(&entities.UnverifiedUser{}, "expired < ?", now)
 }
 
-func (r *repository) Create(user *UnverifiedUser) (*uint32, error) {
+func (r *repository) Create(user *entities.UnverifiedUser) (*uint32, error) {
 	if err := r.DB.Create(user).Error; err != nil {
 		return nil, err
 	}
@@ -38,25 +38,25 @@ func (r *repository) Create(user *UnverifiedUser) (*uint32, error) {
 
 func (r *repository) IsUsernameOrEmailAlreadyInUse(username *string, email *string) bool {
 	var count int64
-	err := r.DB.Model(&user.User{}).Where("username = ? OR email = ?", username, email).Count(&count).Error
+	err := r.DB.Model(&entities.User{}).Where("username = ? OR email = ?", username, email).Count(&count).Error
 	if err != nil {
 		return false
 	}
 	return count > 0
 }
 
-func (r *repository) FindByID(ID *uint32, user *UnverifiedUser) error {
+func (r *repository) FindByID(ID *uint32, user *entities.UnverifiedUser) error {
 	return r.DB.Find(user, "id = ?", ID).Error
 }
 
 func (r *repository) DeleteByID(ID *uint32) error {
-	return r.DB.Delete(&UnverifiedUser{}, " id = ?", ID).Error
+	return r.DB.Delete(&entities.UnverifiedUser{}, " id = ?", ID).Error
 }
 
 func (r *repository) UpdateVerificationCode(ID *uint32, newCode *string) error {
-	return r.DB.Model(&UnverifiedUser{}).Where("id = ?", ID).Update("code", &newCode).Error
+	return r.DB.Model(&entities.UnverifiedUser{}).Where("id = ?", ID).Update("code", &newCode).Error
 }
 
 func (r *repository) FindCodeByID(ID *uint32, code *string) error {
-	return r.DB.Model(&UnverifiedUser{}).Where("id = ?", ID).Select("code").Scan(code).Error
+	return r.DB.Model(&entities.UnverifiedUser{}).Where("id = ?", ID).Select("code").Scan(code).Error
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"globe/internal/repository/dtos"
-	refreshTokenType "globe/internal/repository/entities/refreshToken"
+	"globe/internal/repository/entities"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,7 +29,7 @@ func (s *service) Update(
 	}
 
 	// find refresh token
-	var refreshToken refreshTokenType.RefreshToken
+	var refreshToken entities.RefreshToken
 	if err := s.redis.GetRefreshTokenByID(ctx, &claims.UserID, &refreshToken); err != nil {
 		if err := s.refreshTokenRepository.FindByID(&claims.UserID, &refreshToken); err != nil {
 			return nil, errors.New("Couldn't find refresh token")
@@ -43,17 +43,17 @@ func (s *service) Update(
 	}
 
 	// new refresh token
-	newRefreshToken := refreshTokenType.RefreshToken{
+	newRefreshToken := &entities.RefreshToken{
 		ID: claims.UserID,
 		Token: uuid.NewString(),
 		Expired: time.Now().Add(time.Hour*168),
 	}
 
 	// save new refresh token
-	if err := s.redis.SetRefreshToken(ctx, &newRefreshToken, time.Hour*24); err != nil {
+	if err := s.redis.SetRefreshToken(ctx, newRefreshToken, time.Hour*24); err != nil {
 		return nil, errors.New("Couldn't save refresh token to redis")
 	}
-	if err := s.refreshTokenRepository.Create(&newRefreshToken); err != nil {
+	if err := s.refreshTokenRepository.Create(newRefreshToken); err != nil {
 		return nil, errors.New("Couldn't save refresh token to DB")
 	}
 

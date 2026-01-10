@@ -3,16 +3,15 @@ package userService
 import (
 	"errors"
 	"globe/internal/repository/dtos"
-	"globe/internal/repository/entities/unverifiedUser"
-	"globe/internal/repository/entities/user"
+	"globe/internal/repository/entities"
 	"math/rand"
 	"strconv"
 )
 
 func (s *service) Verification(request *dtos.VerifyUserRequest, token *string) error {
 	// validate request
-	if request.Code == "" ||
-	len(request.Code) != 6 {
+	if request.Code == nil ||
+	len(*request.Code) != 6 {
 		return errors.New("Bad request")
 	}
 
@@ -23,18 +22,18 @@ func (s *service) Verification(request *dtos.VerifyUserRequest, token *string) e
 	}
 
 	// find unverified user bi ID
-	unverifiedUser :=  &unverifiedUser.UnverifiedUser{}
+	unverifiedUser :=  &entities.UnverifiedUser{}
 	if err := s.unverifiedUserRepository.FindByID(&claims.UserID, unverifiedUser); err != nil {
 		return err
 	}
 
 	// verify user's code
-	if request.Code != unverifiedUser.Code {
+	if *request.Code != unverifiedUser.Code {
 		return errors.New("Incorrect verification code")
 	}
 
 	// user
-	user := user.User{
+	user := &entities.User{
 		Username: unverifiedUser.Username,
 		Email: unverifiedUser.Email,
 		Password: unverifiedUser.Password,
@@ -57,7 +56,7 @@ func (s *service) Verification(request *dtos.VerifyUserRequest, token *string) e
 	}
 
 	// create user
-	if err := s.userRepository.Create(&user); err != nil {
+	if err := s.userRepository.Create(user); err != nil {
 		tx.Rollback()
 		return errors.New("Couldn't create user")
 	}

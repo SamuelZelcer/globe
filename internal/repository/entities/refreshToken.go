@@ -1,4 +1,4 @@
-package refreshToken
+package entities
 
 import "time"
 

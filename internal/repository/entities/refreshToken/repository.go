@@ -1,10 +1,14 @@
 package refreshToken
 
-import "gorm.io/gorm"
+import (
+	"globe/internal/repository/entities"
+
+	"gorm.io/gorm"
+)
 
 type Repository interface {
-	Create(refreshtoken *RefreshToken) error
-	FindByID(ID *uint32, refreshToken *RefreshToken) error
+	Create(refreshtoken *entities.RefreshToken) error
+	FindByID(ID *uint32, refreshToken *entities.RefreshToken) error
 }
 
 type repository struct {
@@ -15,10 +19,10 @@ func InitRepository(DB *gorm.DB) Repository {
 	return &repository{DB: DB}
 }
 
-func (r *repository) Create(refreshtoken *RefreshToken) error {
+func (r *repository) Create(refreshtoken *entities.RefreshToken) error {
 	return r.DB.Save(refreshtoken).Error
 }
 
-func (r *repository) FindByID(ID *uint32, refreshToken *RefreshToken) error {
+func (r *repository) FindByID(ID *uint32, refreshToken *entities.RefreshToken) error {
 	return r.DB.Find(refreshToken, "id = ?", ID).Error
 }

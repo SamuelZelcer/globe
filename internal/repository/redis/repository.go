@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
-	"globe/internal/repository/entities/refreshToken"
+	"globe/internal/repository/entities"
 	"strconv"
 	"strings"
 	"time"
@@ -14,13 +14,13 @@ import (
 type Repository interface {
 	SetRefreshToken(
 		ctx context.Context,
-		refreshToken *refreshToken.RefreshToken,
+		refreshToken *entities.RefreshToken,
 		expiratioin time.Duration,
 	) error
 	GetRefreshTokenByID(
 		ctx context.Context,
 		id *uint32,
-		refreshToken *refreshToken.RefreshToken,
+		refreshToken *entities.RefreshToken,
 	) error 
 }
 
@@ -34,7 +34,7 @@ func InitRepository(client *redis.Client) Repository {
 
 func (r *repository) SetRefreshToken(
 	ctx context.Context,
-	refreshToken *refreshToken.RefreshToken,
+	refreshToken *entities.RefreshToken,
 	expiratioin time.Duration,
 ) error {
 	return r.client.Set(
@@ -48,7 +48,7 @@ func (r *repository) SetRefreshToken(
 func (c *repository) GetRefreshTokenByID(
 	ctx context.Context,
 	id *uint32,
-	refreshToken *refreshToken.RefreshToken,
+	refreshToken *entities.RefreshToken,
 ) error {
 	refreshTokenExpiration, err := c.client.Get(ctx, strconv.FormatUint(uint64(*id), 10)).Result()
 	

@@ -1,4 +1,4 @@
-package unverifiedUser
+package entities
 
 import "time"
 
