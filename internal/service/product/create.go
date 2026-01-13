@@ -1,6 +1,7 @@
 package productService
 
 import (
+	"context"
 	"errors"
 	"globe/internal/repository/dtos"
 	"globe/internal/repository/entities"
@@ -11,44 +12,55 @@ import (
 
 var PRICEREGEXP = regexp.MustCompile(`^\d+\.\d{2}$`)
 
-func (s *service) Create(request *dtos.CreateProductRequest, token *string) error {
+func (s *service) Create(
+	ctx context.Context,
+	request *dtos.CreateProductRequest,
+	token *string,
+) (*dtos.AuthenticationTokens, error) {
 	// validate request
 	if request.Name == nil ||
 	request.Price == nil ||
 	request.Description == nil ||
 	len(*request.Name) > 100 ||
 	len(*request.Description) > 800 {
-		return errors.New("Invalid request")
+		return nil, errors.New("Invalid request")
 	}
 
-	// validate token and get claims
+	// validate token and get claims | update auth tokens
+	tokens := &dtos.AuthenticationTokens{}
 	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
-		return errors.New("invalid jwt token")
+		if request.RefreshToken == nil {
+			return nil, errors.New("Invalid jwt token")
+		}
+		claims, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, tokens)
+		if err != nil {
+			return nil, errors.New(err.Error())
+		}
 	}
 
 	// validate price .00
 	if !PRICEREGEXP.MatchString(*request.Price) {
-		return errors.New("Invalid price")
+		return nil, errors.New("Invalid price")
 	}
 
 	// convert price to float value
 	floatPrice, err := strconv.ParseFloat(*request.Price, 64)
 	if err != nil {
-		return errors.New("Couldn't convert price to float value")
+		return nil, errors.New("Couldn't convert price to float value")
 	}
 
 	// product
 	product := &entities.Product{
 		Name: *request.Name,
-		Price: uint32(math.Round(floatPrice*100)),
+		Price: uint64(math.Round(floatPrice*100)),
 		Description: *request.Description,
 		Owner: claims.UserID,
 	}
 
 	// save product
 	if err := s.productRepository.Save(product); err != nil {
-		return errors.New("Couldn't save product")
+		return nil, errors.New("Couldn't save product")
 	}
-	return nil
+	return tokens, nil
 }

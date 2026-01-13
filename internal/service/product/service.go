@@ -1,6 +1,7 @@
 package productService
 
 import (
+	"context"
 	"globe/internal/repository/dtos"
 	"globe/internal/repository/entities/product"
 	"globe/internal/repository/entities/user"
@@ -8,12 +9,25 @@ import (
 	"globe/internal/repository/transactions"
 	"globe/internal/service/email"
 	JWT "globe/internal/service/jwt"
+	refreshTokenService "globe/internal/service/refreshToken"
 )
 
 type Service interface {
-	Create(request *dtos.CreateProductRequest, token *string) error
-	Update(request *dtos.UpdateProductRequest, token *string) (*dtos.UpdateProductResponse, error)
-	Delete(request *dtos.DeleteProductRequest, token *string) error
+	Create(
+		ctx context.Context,
+		request *dtos.CreateProductRequest,
+		token *string,
+	) (*dtos.AuthenticationTokens, error)
+	Update(
+		ctx context.Context,
+		request *dtos.UpdateProductRequest,
+		token *string,
+	) (*dtos.AuthenticationTokens, *dtos.UpdateProductResponse, error)
+	Delete(
+		ctx context.Context,
+		request *dtos.DeleteProductRequest,
+		token *string,
+	) (*dtos.AuthenticationTokens, error)
 }
 
 type service struct {
@@ -21,8 +35,9 @@ type service struct {
 	userRepository user.Repository
 	email email.Email
 	transactions transactions.Transactions
-	redis redis.Repository
+	redis redis.Cache
 	jwtManager JWT.Manager
+	refreshTokenService refreshTokenService.Service
 }
 
 func Init(
@@ -30,8 +45,9 @@ func Init(
 	userRepository user.Repository,
 	email email.Email,
 	transactions transactions.Transactions,
-	redis redis.Repository,
+	redis redis.Cache,
 	jwtManager JWT.Manager,
+	refreshTokenService refreshTokenService.Service,
 ) Service {
 	return &service{
 		productRepository: productRepository,
@@ -40,5 +56,6 @@ func Init(
 		transactions: transactions,
 		redis: redis,
 		jwtManager: jwtManager,
+		refreshTokenService: refreshTokenService,
 	}
 }

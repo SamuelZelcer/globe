@@ -8,11 +8,11 @@ import (
 )
 
 type UserClaims struct {
-	UserID uint32
+	UserID uint64
 	jwt.RegisteredClaims
 }
 
-func InitUserClaims(userID *uint32, email *string, duration *time.Duration) *UserClaims {
+func InitUserClaims(userID *uint64, email *string, duration *time.Duration) *UserClaims {
 	return &UserClaims{
 		UserID: *userID,
 		RegisteredClaims: jwt.RegisteredClaims{

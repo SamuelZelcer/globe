@@ -21,13 +21,22 @@ func (h *handler) Update(ctx echo.Context) error {
 	if err := ctx.Bind(request); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Bad request"})
 	}
-	product, err := h.service.Update(request, &splitAuthHeader[1]); 
+	tokens, product, err := h.service.Update(ctx.Request().Context(), request, &splitAuthHeader[1]); 
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
+	if request.RefreshToken == nil {
+		return ctx.JSON(http.StatusOK, map[string]string{
+			"name": *product.Name,
+			"price": *product.Price,
+			"description": *product.Description,
+		})
+	}
 	return ctx.JSON(http.StatusOK, map[string]string{
-		"name": *product.Name,
-		"price": *product.Price,
-		"description": *product.Description,
-	})
+			"name": *product.Name,
+			"price": *product.Price,
+			"description": *product.Description,
+			"refreshToken": *tokens.RefreshToken,
+			"accessToken": *tokens.AccessToken,
+		})
 }

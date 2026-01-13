@@ -2,7 +2,6 @@ package main
 
 import (
 	productHandler "globe/internal/handler/product"
-	refreshTokenHandler "globe/internal/handler/refreshToken"
 	userHandler "globe/internal/handler/user"
 	"globe/internal/repository"
 	"globe/internal/repository/entities/product"
@@ -61,11 +60,11 @@ func main() {
         transactions,
         redisRepository,
         jwtManager,
+        refreshTokenService,
     )
 
     // handler
     userHandler := userHandler.Init(userService)
-    refreshTokenHandler := refreshTokenHandler.Init(refreshTokenService)
     productHandler := productHandler.Init(productService)
 
     e := echo.New()
@@ -73,14 +72,14 @@ func main() {
     e.Use(middleware.CORS())
     
     // API
+    // user
     e.POST("/user/sign-up", userHandler.SignUp)
     e.POST("/user/verification", userHandler.Verification)
     e.POST("/user/verification/get-new-code", userHandler.GetNewCode)
     e.POST("/user/verification/send-code-again", userHandler.SendCodeAgain)
     e.POST("/user/sign-in", userHandler.SignIn)
 
-    e.POST("/auth/refresh-token/update", refreshTokenHandler.Update)
-
+    // product
     e.POST("/product/create", productHandler.Create)
     e.POST("/product/update", productHandler.Update)
     e.POST("/product/delete", productHandler.Delete)

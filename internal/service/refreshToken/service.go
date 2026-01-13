@@ -10,21 +10,26 @@ import (
 )
 
 type Service interface {
-	Update(ctx context.Context, refreshToken *string, accessToken *string) (*dtos.AuthenticationTokens, error)
+	Update(
+		ctx context.Context,
+		providedRefreshToken *string,
+		providedAccessToken *string,
+		tokenss *dtos.AuthenticationTokens,
+	) (*JWT.UserClaims, error)
 }
 
 type service struct {
 	refreshTokenRepository refreshToken.Repository
 	userRepository user.Repository
 	jwtManager JWT.Manager
-	redis redis.Repository
+	redis redis.Cache
 }
 
 func Init(
 	refreshTokenRepository refreshToken.Repository,
 	userRepository user.Repository,
 	jwtManager JWT.Manager,
-	redis redis.Repository,
+	redis redis.Cache,
 ) Service {
 	return &service{
 		refreshTokenRepository: refreshTokenRepository,

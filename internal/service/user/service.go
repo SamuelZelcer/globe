@@ -26,7 +26,7 @@ type service struct {
 	email email.Email
 	jwtManager JWT.Manager
 	transactions transactions.Transactions
-	redis redis.Repository
+	redis redis.Cache
 	refreshTokenRepository refreshToken.Repository
 }
 
@@ -36,7 +36,7 @@ func Init(
 	email email.Email,
 	jwtManager JWT.Manager,
 	transactions transactions.Transactions,
-	redis redis.Repository,
+	redis redis.Cache,
 	refreshTokenRepository refreshToken.Repository,
 ) Service {
 	return &service{

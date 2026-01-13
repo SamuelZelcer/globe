@@ -1,25 +1,37 @@
 package productService
 
 import (
+	"context"
 	"errors"
 	"globe/internal/repository/dtos"
 )
 
-func (s *service) Delete(request *dtos.DeleteProductRequest, token *string) error {
+func (s *service) Delete(
+	ctx context.Context,
+	request *dtos.DeleteProductRequest,
+	token *string,
+) (*dtos.AuthenticationTokens, error) {
 	// validate request
 	if request.ProductID == nil {
-		return errors.New("Invalid request")
+		return nil, errors.New("Invalid request")
 	}
 
-	// validate jwt token and get claims
+	// validate token | update auth tokens
+	tokens := &dtos.AuthenticationTokens{}
 	_, err := s.jwtManager.Validate(token)
-	if err != nil{
-		return errors.New("Invalid token")
+	if err != nil {
+		if request.RefreshToken == nil {
+			return nil, errors.New("Invalid jwt token")
+		}
+		_, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, tokens)
+		if err != nil {
+			return nil, errors.New(err.Error())
+		}
 	}
 
 	// delete product
 	if err := s.productRepository.DeleteByID(request.ProductID); err != nil {
-		return errors.New("Couldn't delete product")
+		return nil, errors.New("Couldn't delete product")
 	}
-	return nil
+	return tokens, nil
 }

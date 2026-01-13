@@ -4,13 +4,15 @@ type CreateProductRequest struct {
 	Name *string `json:"name"`
 	Price *string `json:"price"`
 	Description *string `json:"description"`
+	RefreshToken *string
 }
 
 type UpdateProductRequest struct {
-	ProductID *uint32 `json:"productID"`
+	ProductID *uint64 `json:"productID"`
 	Name *string `json:"name"`
 	Price *string `json:"price"`
 	Description *string `json:"description"`
+	RefreshToken *string
 }
 
 type UpdateProductResponse struct {
@@ -20,5 +22,6 @@ type UpdateProductResponse struct {
 }
 
 type DeleteProductRequest struct {
-	ProductID *uint32 `json:"productID"`
+	ProductID *uint64 `json:"productID"`
+	RefreshToken *string
 }
