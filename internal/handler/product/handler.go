@@ -10,6 +10,7 @@ type Handler interface {
 	Create(ctx echo.Context) error
 	Update(ctx echo.Context) error
 	Delete(ctx echo.Context) error
+	Search(ctx echo.Context) error
 }
 
 type handler struct {

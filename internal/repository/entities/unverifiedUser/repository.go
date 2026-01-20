@@ -46,7 +46,7 @@ func (r *repository) IsUsernameOrEmailAlreadyInUse(username *string, email *stri
 }
 
 func (r *repository) FindByID(ID *uint64, user *entities.UnverifiedUser) error {
-	return r.DB.Find(user, "id = ?", ID).Error
+	return r.DB.First(user, "id = ?", ID).Error
 }
 
 func (r *repository) DeleteByID(ID *uint64) error {

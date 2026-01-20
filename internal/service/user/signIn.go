@@ -7,7 +7,6 @@ import (
 	"globe/internal/repository/dtos"
 	"globe/internal/repository/entities"
 	"net/mail"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -56,7 +55,7 @@ func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dto
 	// save refresh token to redis
 	if err := s.redis.SET(
 		ctx,
-		strconv.FormatUint(uint64(refreshToken.ID), 10),
+		fmt.Sprintf("refreshtoken:%d", refreshToken.ID),
 		fmt.Sprintf("%s_%s", refreshToken.Token, refreshToken.Expired.Format(time.RFC3339)),
 		time.Hour*24,
 	); err != nil {

@@ -1,8 +1,8 @@
 package dtos
 
 type AuthenticationTokens struct {
-	RefreshToken *string
-	AccessToken *string
+	RefreshToken *string `json:"refreshToken"`
+	AccessToken *string `json:"accessToken"`
 }
 
 type UpdateAuthTokensRequest struct {

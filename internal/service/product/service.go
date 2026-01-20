@@ -10,6 +10,13 @@ import (
 	"globe/internal/service/email"
 	JWT "globe/internal/service/jwt"
 	refreshTokenService "globe/internal/service/refreshToken"
+	"regexp"
+)
+
+
+var (
+	reg = regexp.MustCompile(`[\s'"]`)
+	PRICEREGEXP = regexp.MustCompile(`^\d+\.\d{2}$`)
 )
 
 type Service interface {
@@ -22,12 +29,13 @@ type Service interface {
 		ctx context.Context,
 		request *dtos.UpdateProductRequest,
 		token *string,
-	) (*dtos.AuthenticationTokens, *dtos.UpdateProductResponse, error)
+	) (*dtos.AuthenticationTokens, *dtos.UpdateProductResponce, error)
 	Delete(
 		ctx context.Context,
 		request *dtos.DeleteProductRequest,
 		token *string,
 	) (*dtos.AuthenticationTokens, error)
+	Search(ctx context.Context, request dtos.SearchRequest) (*dtos.SearchProductResponse, error)
 }
 
 type service struct {

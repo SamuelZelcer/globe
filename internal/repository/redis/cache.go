@@ -18,6 +18,15 @@ type Cache interface {
 		ctx context.Context,
 		key string,
 	) (string, error)
+	DEL(
+		ctx context.Context,
+		key string,
+	) error
+	EXPIRE(
+		ctx context.Context,
+		key string,
+		expiration time.Duration,
+	) error
 }
 
 type cache struct {
@@ -26,13 +35,6 @@ type cache struct {
 
 func InitRepository(client *redis.Client) Cache {
 	return &cache{client: client}
-}
-
-func (c *cache) GET(
-	ctx context.Context,
-	key string,
-) (string, error) {
-	return c.client.Get(ctx, key).Result()
 }
 
 func (c *cache) SET(
@@ -45,6 +47,35 @@ func (c *cache) SET(
 		ctx,
 		key,
 		value,
+		expiration,
+	).Err()
+}
+
+func (c *cache) GET(
+	ctx context.Context,
+	key string,
+) (string, error) {
+	return c.client.Get(ctx, key).Result()
+}
+
+func (c *cache) DEL(
+	ctx context.Context,
+	key string,
+) error {
+	return c.client.Del(
+		ctx,
+		key,
+	).Err()
+}
+
+func (c *cache) EXPIRE(
+	ctx context.Context,
+	key string,
+	expiration time.Duration,
+) error {
+	return c.client.Expire(
+		ctx,
+		key,
 		expiration,
 	).Err()
 }

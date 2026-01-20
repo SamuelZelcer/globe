@@ -24,5 +24,5 @@ func (r *repository) Save(refreshtoken *entities.RefreshToken) error {
 }
 
 func (r *repository) FindByID(ID *uint64, refreshToken *entities.RefreshToken) error {
-	return r.DB.Find(refreshToken, "id = ?", ID).Error
+	return r.DB.First(refreshToken, "id = ?", ID).Error
 }

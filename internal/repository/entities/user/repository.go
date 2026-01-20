@@ -9,6 +9,7 @@ import (
 type Repository interface {
 	Create(user *entities.User) error
 	FindByEmail(email *string, user *entities.User) error
+	FindByiD(ID *uint64, user *entities.User) error
 }
 
 type repository struct {
@@ -25,4 +26,8 @@ func (r *repository) Create(user *entities.User) error {
 
 func (r *repository) FindByEmail(email *string, user *entities.User) error {
 	return r.DB.Find(user, "email = ?", email).Error
+}
+
+func (r *repository) FindByiD(ID *uint64, user *entities.User) error {
+	return r.DB.Find(user, "id = ?", ID).Error
 }

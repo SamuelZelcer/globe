@@ -83,6 +83,7 @@ func main() {
     e.POST("/product/create", productHandler.Create)
     e.POST("/product/update", productHandler.Update)
     e.POST("/product/delete", productHandler.Delete)
+    e.POST("/product/search", productHandler.Search)
 
     e.Start("127.0.0.1:8080")
 }

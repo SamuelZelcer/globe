@@ -7,7 +7,6 @@ import (
 	"globe/internal/repository/dtos"
 	"globe/internal/repository/entities"
 	JWT "globe/internal/service/jwt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -34,19 +33,19 @@ func (s *service) Update(
 
 	// find refresh token
 	var refreshToken entities.RefreshToken
-	value, err := s.redis.GET(ctx, strconv.FormatUint(uint64(claims.UserID), 10))
+	value, err := s.redis.GET(ctx, fmt.Sprintf("refreshtoken:%d", claims.UserID))
 	if err != nil {
 		if err := s.refreshTokenRepository.FindByID(&claims.UserID, &refreshToken); err != nil {
 			return nil, errors.New("Couldn't find refresh token")
 		}
 	}
 	// parse value
-	spltValue := strings.Split(value, "_")
-	expiration, err := time.Parse(time.RFC3339, spltValue[1])
+	splitValue := strings.Split(value, "_")
+	expiration, err := time.Parse(time.RFC3339, splitValue[1])
 	if err != nil {
 		return nil, errors.New("Couldn't parse expiration bact to time.Time")
 	}
-	refreshToken.Token = spltValue[0]
+	refreshToken.Token = splitValue[0]
 	refreshToken.Expired = expiration
 
 	// validate provided refreshToken
@@ -64,7 +63,7 @@ func (s *service) Update(
 	// save new refresh token to redis
 	if err := s.redis.SET(
 		ctx,
-		strconv.FormatUint(uint64(claims.UserID), 10),
+		fmt.Sprintf("refreshtoken:%d", refreshToken.ID),
 		fmt.Sprintf("%s_%s", newRefreshToken.Token, newRefreshToken.Expired.Format(time.RFC3339)),
 		time.Hour*24,
 	); err != nil {
