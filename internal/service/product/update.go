@@ -16,37 +16,37 @@ import (
 func (s *service) Update(
 	ctx context.Context,
 	request *dtos.UpdateProductRequest,
-	token *string,
+	token string,
 ) (*dtos.AuthenticationTokens, *dtos.UpdateProductResponce, error) {
 	// validate request
-	if request.ProductID == nil {
+	if request.ProductID == 0 {
 		return nil, nil, errors.New("Invalid request")
 	}
 
 	// validate token
-	tokens := &dtos.AuthenticationTokens{}
+	var tokens dtos.AuthenticationTokens
 	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
-		if request.RefreshToken == nil {
+		if request.RefreshToken == "" {
 			return nil, nil, errors.New("Invalid jwt token")
 		}
 
 		// update authentication tokens
-		claims, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, tokens)
+		claims, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, &tokens)
 		if err != nil {
 			return nil, nil, errors.New(err.Error())
 		}
 	}
 
 	// product
-	product := &entities.Product{}
+	var product entities.Product
 	
 	// find product in redis
-	productJSON, err := s.redis.GET(ctx, fmt.Sprintf("product:%d", *request.ProductID))
+	productJSON, err := s.redis.GET(ctx, fmt.Sprintf("product:%d", request.ProductID))
 	if err != nil {
 
 		// find product in database
-		if err := s.productRepository.FindByID(request.ProductID, product); err != nil {
+		if err := s.productRepository.FindByID(request.ProductID, &product); err != nil {
 			return nil, nil, errors.New("This product does not exist")
 		}
 		
@@ -54,15 +54,15 @@ func (s *service) Update(
 
 	// parse productJSON if find
 	if productJSON != "" {
-		if err := json.Unmarshal([]byte(productJSON), product); err != nil {
+		if err := json.Unmarshal([]byte(productJSON), &product); err != nil {
 			return nil, nil, errors.New("Couldn't parse product from JSON")
 		}
 	}
 
 	// parse product name
 	var parsedName string
-	if request.Name != nil {
-		parsedName = reg.ReplaceAllString(strings.ToLower(*request.Name), "")
+	if request.Name != "" {
+		parsedName = reg.ReplaceAllString(strings.ToLower(request.Name), "")
 	}
 
 	// is this a user-owned product
@@ -71,7 +71,7 @@ func (s *service) Update(
 	}
 
 	// update name if provided
-	if request.Name != nil {
+	if request.Name != "" {
 		
 		// delete most popular pages from cache with old name
 		for i := range 5 {
@@ -79,17 +79,18 @@ func (s *service) Update(
 			s.redis.DEL(ctx, fmt.Sprintf("search:%s:page:%d", parsedName, i))
 		}
 		product.Name = parsedName
+		product.OriginalName = request.Name
 	}
 
 	// update price if provided
-	if request.Price != nil {
+	if request.Price != "" {
 		// validate price .00
-		if !PRICEREGEXP.MatchString(*request.Price) {
+		if !PRICEREGEXP.MatchString(request.Price) {
 			return nil, nil, errors.New("Invalid price")
 		}
 
 		// convert price to float value
-		floatPrice, err := strconv.ParseFloat(*request.Price, 64)
+		floatPrice, err := strconv.ParseFloat(request.Price, 64)
 		if err != nil {
 			return nil, nil, errors.New("Couldn't convert price to float value")
 		}
@@ -97,8 +98,8 @@ func (s *service) Update(
 	}
 
 	// update description if provided
-	if request.Description != nil {
-		product.Description = *request.Description
+	if request.Description != "" {
+		product.Description = request.Description
 	}
 
 	// parse product to JSON
@@ -108,7 +109,7 @@ func (s *service) Update(
 	}
 
 	// save updated product to database
-	if _, err := s.productRepository.Save(product); err != nil {
+	if _, err := s.productRepository.Save(&product); err != nil {
 		return nil, nil, errors.New("Couldn't save updated product")
 	}
 	
@@ -125,10 +126,10 @@ func (s *service) Update(
 	// convert price
 	displayPrice := fmt.Sprintf("%.2f", float64(product.Price)/100)
 
-	return tokens,
+	return &tokens,
 	&dtos.UpdateProductResponce{
-		Name: &product.Name,
-		Price: &displayPrice,
-		Description: &product.Description,
+		Name: product.OriginalName,
+		Price: displayPrice,
+		Description: product.Description,
 	}, nil
 }

@@ -21,15 +21,15 @@ func (h *handler) Delete(ctx echo.Context) error {
 	if err := ctx.Bind(request); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Bad request"})
 	}
-	tokens, err := h.service.Delete(ctx.Request().Context(), request, &splitAuthHeader[1])
+	tokens, err := h.service.Delete(ctx.Request().Context(), request, splitAuthHeader[1])
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	if request.RefreshToken == nil {
+	if request.RefreshToken == "" {
 		return ctx.JSON(http.StatusOK, "Product was delete")
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{
-		"refreshToken": *tokens.RefreshToken,
-		"accessToken": *tokens.AccessToken,
+		"refreshToken": tokens.RefreshToken,
+		"accessToken": tokens.AccessToken,
 	})
 }

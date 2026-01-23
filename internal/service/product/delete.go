@@ -12,44 +12,44 @@ import (
 func (s *service) Delete(
 	ctx context.Context,
 	request *dtos.DeleteProductRequest,
-	token *string,
+	token string,
 ) (*dtos.AuthenticationTokens, error) {
 	// validate request
-	if request.ProductID == nil {
+	if request.ProductID == 0 {
 		return nil, errors.New("Invalid request")
 	}
 
 	// validate token
-	tokens := &dtos.AuthenticationTokens{}
+	var tokens dtos.AuthenticationTokens
 	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
-		if request.RefreshToken == nil {
+		if request.RefreshToken == "" {
 			return nil, errors.New("Invalid jwt token")
 		}
 
 		// update authentication tokens
-		claims, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, tokens)
+		claims, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, &tokens)
 		if err != nil {
 			return nil, errors.New(err.Error())
 		}
 	}
 
 	// product
-	product := &entities.Product{}
+	var product entities.Product
 	
 	// find product in redis
-	productJSON, err := s.redis.GET(ctx, fmt.Sprintf("product:%d", *request.ProductID))
+	productJSON, err := s.redis.GET(ctx, fmt.Sprintf("product:%d", request.ProductID))
 	if err != nil {
 
 		// find product in database
-		if err := s.productRepository.FindByID(request.ProductID, product); err != nil {
+		if err := s.productRepository.FindByID(request.ProductID, &product); err != nil {
 			return nil, errors.New("This product does not exist")
 		}
 	}
 
 	// parse productJSON if find
 	if productJSON != "" {
-		if err := json.Unmarshal([]byte(productJSON), product); err != nil {
+		if err := json.Unmarshal([]byte(productJSON), &product); err != nil {
 			return nil, errors.New("Couldn't parse product from JSON")
 		}
 	}
@@ -60,12 +60,12 @@ func (s *service) Delete(
 	}
 
 	// delete product from redis
-	s.redis.DEL(ctx, fmt.Sprintf("product:%d", *request.ProductID))
+	s.redis.DEL(ctx, fmt.Sprintf("product:%d", request.ProductID))
 
 	// delete product from database
 	if err := s.productRepository.DeleteByID(request.ProductID); err != nil {
 		return nil, errors.New("Couldn't delete product")
 	}
 	
-	return tokens, nil
+	return &tokens, nil
 }

@@ -12,30 +12,30 @@ import (
 	"time"
 )
 
-func (s *service) Search(ctx context.Context, request dtos.SearchRequest) (*dtos.SearchProductResponse, error) {
+func (s *service) Search(ctx context.Context, request *dtos.SearchRequest) (*dtos.SearchProductResponse, error) {
 	// validate request
-	if request.Name == nil ||
-	request.Page == nil {
+	if request.Name == "" ||
+	request.Page == 0 {
 		return nil, errors.New("Invalid request")
 	}
 
 	// parse product name
-	parsedName := reg.ReplaceAllString(strings.ToLower(*request.Name), "")
+	parsedName := reg.ReplaceAllString(strings.ToLower(request.Name), "")
 	
 	// find a slice of products
-	productIDsJSON, err := s.redis.GET(ctx, fmt.Sprintf("search:%s:page:%d", parsedName, *request.Page))
+	productIDsJSON, err := s.redis.GET(ctx, fmt.Sprintf("search:%s:page:%d", parsedName, request.Page))
 	if err != nil {
 
 		// find products from database
 		return s.findProductsFromDB(
-			ctx, request, &parsedName,
+			ctx, request, parsedName,
 		)
 	}
 
 	// reset TTL for productIDs
 	if err := s.redis.EXPIRE(
 		ctx,
-		fmt.Sprintf("search:%s:page:%d", parsedName, *request.Page),
+		fmt.Sprintf("search:%s:page:%d", parsedName, request.Page),
 		time.Hour*4,
 	); err != nil {
 		return nil, errors.New("Couldn't reset TTL for productIDs")
@@ -59,19 +59,19 @@ func (s *service) Search(ctx context.Context, request dtos.SearchRequest) (*dtos
 		if err != nil {
 
 			// find product in database
-			if err := s.productRepository.FindByID(&v, product); err != nil {
+			if err := s.productRepository.FindByID(v, product); err != nil {
 				
 				// delete outdated page from redis
 				if err := s.redis.DEL(
 					ctx,
-					fmt.Sprintf("search:%s:page:%d", parsedName, *request.Page),
+					fmt.Sprintf("search:%s:page:%d", parsedName, request.Page),
 				); err != nil {
 					return nil, errors.New("Couldn't delete outdated page from redis")
 				}
 
 				// find products from database
 				return s.findProductsFromDB(
-					ctx, request, &parsedName,
+					ctx, request, parsedName,
 				)
 			}
 			
@@ -117,9 +117,9 @@ func (s *service) Search(ctx context.Context, request dtos.SearchRequest) (*dtos
 		products = append(
 			products,
 			dtos.SearchProduct{
-				ProductID: &product.ID,
-				Name: &product.Name,
-				Price: &displayPrice,
+				ProductID: product.ID,
+				Name: product.OriginalName,
+				Price: displayPrice,
 			},
 		)
 	}
@@ -132,7 +132,7 @@ func (s *service) Search(ctx context.Context, request dtos.SearchRequest) (*dtos
 	)
 	if err != nil {
 		// get amount of products from database
-		if err := s.productRepository.CountProducts(&parsedName, &amountOfProducts); err != nil {
+		if err := s.productRepository.CountProducts(parsedName, &amountOfProducts); err != nil {
 			return nil, errors.New("Couldn't count products")
 		}
 
@@ -168,8 +168,8 @@ func (s *service) Search(ctx context.Context, request dtos.SearchRequest) (*dtos
 	amountOfPages := (amountOfProducts+14)/15
 
 	return &dtos.SearchProductResponse{
-		TotalAmountOfProducts: &amountOfProducts,
-		TotalAmountOfPages: &amountOfPages,
+		TotalAmountOfProducts:amountOfProducts,
+		TotalAmountOfPages:amountOfPages,
 		CurrentPage: request.Page,
 		Products: &products,
 	}, nil
@@ -177,8 +177,8 @@ func (s *service) Search(ctx context.Context, request dtos.SearchRequest) (*dtos
 
 func (s *service) findProductsFromDB(
 	ctx context.Context,
-	request dtos.SearchRequest,
-	parsedName *string,
+	request *dtos.SearchRequest,
+	parsedName string,
 ) (*dtos.SearchProductResponse, error) {
 	// product entities
 	var productEntities []entities.Product
@@ -189,7 +189,7 @@ func (s *service) findProductsFromDB(
 	// find products from database
 	if err := s.productRepository.FindProductsForSearch(
 		parsedName,
-		(int(*request.Page)-1)*15,
+		(int(request.Page)-1)*15,
 		&productEntities,
 	); err != nil {
 		return nil, errors.New("Couldn't find products")
@@ -205,9 +205,9 @@ func (s *service) findProductsFromDB(
 			
 		// mapped productEmtity to prodicts slice
 		products = append(products, dtos.SearchProduct{
-			ProductID: &v.ID,
-			Name: &v.Name,
-			Price: &displayPrice,
+			ProductID: v.ID,
+			Name: v.OriginalName,
+			Price: displayPrice,
 		})
 
 		// parse product to JSON
@@ -239,7 +239,7 @@ func (s *service) findProductsFromDB(
 		// save page to redis
 		if err := s.redis.SET(
 			ctx,
-			fmt.Sprintf("search:%s:page:%d", *parsedName, *request.Page),
+			fmt.Sprintf("search:%s:page:%d", parsedName, request.Page),
 			string(productIDsJSON),
 			time.Hour*4,
 		); err != nil {
@@ -258,7 +258,7 @@ func (s *service) findProductsFromDB(
 		// save amount of products to redis
 		if err := s.redis.SET(
 			ctx,
-			fmt.Sprintf("search:%s", *parsedName),
+			fmt.Sprintf("search:%s", parsedName),
 			fmt.Sprintf("%d", amountOfProducts),
 			time.Hour*4,
 		); err != nil {
@@ -267,8 +267,8 @@ func (s *service) findProductsFromDB(
 	}
 
 	return &dtos.SearchProductResponse{
-		TotalAmountOfProducts: &amountOfProducts,
-		TotalAmountOfPages: &amountOfPages,
+		TotalAmountOfProducts: amountOfProducts,
+		TotalAmountOfPages: amountOfPages,
 		CurrentPage: request.Page,
 		Products: &products,
 	}, nil

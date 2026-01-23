@@ -23,19 +23,19 @@ type Service interface {
 	Create(
 		ctx context.Context,
 		request *dtos.CreateProductRequest,
-		token *string,
+		token string,
 	) (*dtos.AuthenticationTokens, error)
 	Update(
 		ctx context.Context,
 		request *dtos.UpdateProductRequest,
-		token *string,
+		token string,
 	) (*dtos.AuthenticationTokens, *dtos.UpdateProductResponce, error)
 	Delete(
 		ctx context.Context,
 		request *dtos.DeleteProductRequest,
-		token *string,
+		token string,
 	) (*dtos.AuthenticationTokens, error)
-	Search(ctx context.Context, request dtos.SearchRequest) (*dtos.SearchProductResponse, error)
+	Search(ctx context.Context, request *dtos.SearchRequest) (*dtos.SearchProductResponse, error)
 }
 
 type service struct {

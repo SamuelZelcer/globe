@@ -16,63 +16,64 @@ import (
 func (s *service) Create(
 	ctx context.Context,
 	request *dtos.CreateProductRequest,
-	token *string,
+	token string,
 ) (*dtos.AuthenticationTokens, error) {
 	// validate request
-	if request.Name == nil ||
-	request.Price == nil ||
-	request.Description == nil ||
-	len(*request.Name) > 100 ||
-	len(*request.Description) > 800 {
+	if request.Name == "" ||
+	request.Price == "" ||
+	request.Description == "" ||
+	len(request.Name) > 100 ||
+	len(request.Description) > 800 {
 		return nil, errors.New("Invalid request")
 	}
 
 	// validate token and get claims
-	tokens := &dtos.AuthenticationTokens{}
+	var tokens dtos.AuthenticationTokens
 	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
-		if request.RefreshToken == nil {
+		if request.RefreshToken == "" {
 			return nil, errors.New("Invalid jwt token")
 		}
 
 		// update authentication tokens
-		claims, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, tokens)
+		claims, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, &tokens)
 		if err != nil {
 			return nil, errors.New(err.Error())
 		}
 	}
 
 	// parse product name
-	parsedName := reg.ReplaceAllString(strings.ToLower(*request.Name), "")
+	parsedName := reg.ReplaceAllString(strings.ToLower(request.Name), "")
 	
 	// validate price .00
-	if !PRICEREGEXP.MatchString(*request.Price) {
+	if !PRICEREGEXP.MatchString(request.Price) {
 		return nil, errors.New("Invalid price")
 	}
 	
 	// convert price to float value
-	floatPrice, err := strconv.ParseFloat(*request.Price, 64)
+	floatPrice, err := strconv.ParseFloat(request.Price, 64)
 	if err != nil {
 		return nil, errors.New("Couldn't convert price to float value")
 	}
 
 	// find user
 	var user entities.User
-	if err := s.userRepository.FindByiD(&claims.UserID, &user); err != nil {
+	if err := s.userRepository.FindByiD(claims.UserID, &user); err != nil {
 		return nil, errors.New("couldn't find user")
 	}
 	
 	// product
-	product := &entities.Product{
+	product := entities.Product{
 		Name: parsedName,
+		OriginalName: request.Name,
 		Price: uint64(math.Round(floatPrice*100)),
-		Description: *request.Description,
+		Description: request.Description,
 		Owner: claims.UserID,
 		User: user,
 	}
 
 	// save product to database
-	productID, err := s.productRepository.Save(product)
+	productID, err := s.productRepository.Save(&product)
 	if err != nil {
 		return nil, errors.New("Couldn't save product")
 	}
@@ -86,7 +87,7 @@ func (s *service) Create(
 	// save product to redis
 	if err := s.redis.SET(
 		ctx,
-		fmt.Sprintf("product:%d", *productID),
+		fmt.Sprintf("product:%d", productID),
 		string(productJSON),
 		time.Hour*4,
 	); err != nil {
@@ -98,5 +99,5 @@ func (s *service) Create(
 		s.redis.DEL(ctx, fmt.Sprintf("search:%s:page:%d", parsedName, i))
 	}
 
-	return tokens, nil
+	return &tokens, nil
 }

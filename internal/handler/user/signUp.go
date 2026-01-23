@@ -16,5 +16,5 @@ func (h *handler) SignUp(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	return ctx.JSON(http.StatusOK, *token)
+	return ctx.JSON(http.StatusOK, token)
 }

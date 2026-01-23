@@ -12,12 +12,12 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
-func InitUserClaims(userID *uint64, email *string, duration *time.Duration) *UserClaims {
+func InitUserClaims(userID uint64, email string, duration *time.Duration) *UserClaims {
 	return &UserClaims{
-		UserID: *userID,
+		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID: uuid.NewString(),
-			Subject: *email,
+			Subject: email,
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(*duration)),
 		},

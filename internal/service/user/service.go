@@ -13,10 +13,10 @@ import (
 )
 
 type Service interface {
-	SignUp(request *dtos.SignUpRequest) (*string, error)
-	Verification(request *dtos.VerifyUserRequest, token *string) error
-	GetNewCode(token *string) error
-	SendCodeAgain(tokne *string) error
+	SignUp(request *dtos.SignUpRequest) (string, error)
+	Verification(request *dtos.VerifyUserRequest, token string) error
+	GetNewCode(token string) error
+	SendCodeAgain(token string) error
 	SignIn(request *dtos.SignInRequest, ctx context.Context) (*dtos.AuthenticationTokens, error)
 }
 

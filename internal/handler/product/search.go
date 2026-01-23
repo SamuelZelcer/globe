@@ -12,7 +12,7 @@ func (h *handler) Search(ctx echo.Context) error {
 	if err := ctx.Bind(request); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Bad request"})
 	}
-	products, err := h.service.Search(ctx.Request().Context(), *request)
+	products, err := h.service.Search(ctx.Request().Context(), request)
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}

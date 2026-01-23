@@ -10,9 +10,9 @@ import (
 )
 
 type Manager interface {
-	Create(userID *uint64, username *string, duration time.Duration) (*string, error)
-	Validate(tokenStr *string) (*UserClaims, error)
-	ValidateWithoutExpiration(tokenStr *string) (*UserClaims, error)
+	Create(userID uint64, username string, duration time.Duration) (string, error)
+	Validate(tokenStr string) (*UserClaims, error)
+	ValidateWithoutExpiration(tokenStr string) (*UserClaims, error)
 }
 
 type manager struct {
@@ -31,20 +31,20 @@ func Init() Manager {
 	}
 }
 
-func (m *manager) Create(userID *uint64, email *string, duration time.Duration) (*string, error) {
+func (m *manager) Create(userID uint64, email string, duration time.Duration) (string, error) {
 	unsignedToken := jwt.NewWithClaims(
 		jwt.SigningMethodES256,
 		InitUserClaims(userID, email, &duration),
 	)
 	token, err := unsignedToken.SignedString(m.privateKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &token, nil
+	return token, nil
 }
 
-func (m *manager) Validate(tokenStr *string) (*UserClaims, error) {
-	token, err := jwt.ParseWithClaims(*tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
+func (m *manager) Validate(tokenStr string) (*UserClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, errors.New("Invalid token signing method")
 		}
@@ -60,8 +60,8 @@ func (m *manager) Validate(tokenStr *string) (*UserClaims, error) {
 	return claims, nil
 }
 
-func (m *manager) ValidateWithoutExpiration(tokenStr *string) (*UserClaims, error) {
-	token, err := jwt.ParseWithClaims(*tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
+func (m *manager) ValidateWithoutExpiration(tokenStr string) (*UserClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, errors.New("Invalid token signing method")
 		}

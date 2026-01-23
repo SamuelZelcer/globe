@@ -17,7 +17,7 @@ func (h *handler) SignIn(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{
-		"refreshToken" : *authenticationTokens.RefreshToken,
-		"accessToken": *authenticationTokens.AccessToken,
+		"refreshToken" : authenticationTokens.RefreshToken,
+		"accessToken": authenticationTokens.AccessToken,
 	})
 }

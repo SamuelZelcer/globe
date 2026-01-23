@@ -15,13 +15,13 @@ import (
 
 func (s *service) Update(
 	ctx context.Context,
-	providedRefreshToken *string,
-	providedAccessToken *string,
+	providedRefreshToken string,
+	providedAccessToken string,
 	tokens *dtos.AuthenticationTokens,
 ) (*JWT.UserClaims, error) {
 	// validate pair of tokens
-	if providedRefreshToken == nil ||
-	providedAccessToken == nil {
+	if providedRefreshToken == "" ||
+	providedAccessToken == "" {
 		return nil, errors.New("Bad request")
 	}
 
@@ -35,7 +35,7 @@ func (s *service) Update(
 	var refreshToken entities.RefreshToken
 	value, err := s.redis.GET(ctx, fmt.Sprintf("refreshtoken:%d", claims.UserID))
 	if err != nil {
-		if err := s.refreshTokenRepository.FindByID(&claims.UserID, &refreshToken); err != nil {
+		if err := s.refreshTokenRepository.FindByID(claims.UserID, &refreshToken); err != nil {
 			return nil, errors.New("Couldn't find refresh token")
 		}
 	}
@@ -49,7 +49,7 @@ func (s *service) Update(
 	refreshToken.Expired = expiration
 
 	// validate provided refreshToken
-	if refreshToken.Token != *providedRefreshToken || refreshToken.Expired.Before(time.Now()) {
+	if refreshToken.Token != providedRefreshToken || refreshToken.Expired.Before(time.Now()) {
 		return nil, errors.New("Token is invalid or expired")
 	}
 
@@ -76,11 +76,11 @@ func (s *service) Update(
 	}
 
 	// new access token
-	newAccessToken, err := s.jwtManager.Create(&claims.UserID, &claims.Subject, time.Minute*5)
+	newAccessToken, err := s.jwtManager.Create(claims.UserID, claims.Subject, time.Minute*5)
 	if err != nil {
 		return nil, errors.New("Couldn't generate new access token")
 	}
-	tokens.RefreshToken = &newRefreshToken.Token
+	tokens.RefreshToken = newRefreshToken.Token
 	tokens.AccessToken = newAccessToken
 	return claims, nil
 }

@@ -15,15 +15,15 @@ import (
 
 func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dtos.AuthenticationTokens, error) {
 	// validate request
-	if request.Email == nil ||
-	request.Password == nil ||
-	len(*request.Password) < 8 ||
-	len(*request.Password) > 120 {
+	if request.Email == "" ||
+	request.Password == "" ||
+	len(request.Password) < 8 ||
+	len(request.Password) > 120 {
 	    return nil, errors.New("Bad request")
 	}
 
 	// validate email
-	if _, err := mail.ParseAddress(*request.Email); err != nil {
+	if _, err := mail.ParseAddress(request.Email); err != nil {
 		return nil, errors.New("Invalid email")
 	}
 
@@ -36,19 +36,19 @@ func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dto
 
 
 	// compare passwords
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(*request.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
 		return nil, errors.New("Invalid password provided")
 	}
 
 	// refresh token
-	refreshToken := &entities.RefreshToken{
+	refreshToken := entities.RefreshToken{
 		ID: user.ID,
 		Token: uuid.NewString(),
 		Expired: time.Now().Add(time.Hour*168),
 	}
 
 	// save refresh token to DB
-	if err := s.refreshTokenRepository.Save(refreshToken); err != nil {
+	if err := s.refreshTokenRepository.Save(&refreshToken); err != nil {
 		return nil, errors.New("Couldn't create refresh token")
 	}
 
@@ -63,13 +63,13 @@ func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dto
 	}
 
 	// access token
-	accessToken, err := s.jwtManager.Create(&user.ID, &user.Email, time.Minute*5)
+	accessToken, err := s.jwtManager.Create(user.ID, user.Email, time.Minute*5)
 	if err != nil {
 		return nil, errors.New("Couldn't generate access token")
 	}
 
 	return &dtos.AuthenticationTokens{
-		RefreshToken: &refreshToken.Token,
+		RefreshToken: refreshToken.Token,
 		AccessToken: accessToken,
 	}, nil
 }

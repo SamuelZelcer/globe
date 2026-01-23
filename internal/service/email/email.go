@@ -10,12 +10,12 @@ import (
 )
 
 type Email interface {
-	SendVerificationCode(code *string, to *string)
+	SendVerificationCode(code string, to string)
 }
 
 type email struct {
-	MAIL *string
-	MAILAPPPASSWORD *string
+	MAIL string
+	MAILAPPPASSWORD string
 }
 
 func InitEmail() Email {
@@ -25,24 +25,24 @@ func InitEmail() Email {
 	mail := os.Getenv("EMAIL")
 	mailAppPassword := os.Getenv("EMAIL_APP_PASSWORD")
 	return &email{
-		MAIL: &mail,
-		MAILAPPPASSWORD: &mailAppPassword,
+		MAIL:mail,
+		MAILAPPPASSWORD:mailAppPassword,
 	}
 }
 
-func (e *email) SendVerificationCode(code *string, to *string) {
-	message := fmt.Sprintf("Subject: Verification Code --> \n %s", *code)
+func (e *email) SendVerificationCode(code string, to string) {
+	message := fmt.Sprintf("Subject: Verification Code --> \n %s",code)
 	mailAuth := smtp.PlainAuth(
 		"",
-		*e.MAIL,
-		*e.MAILAPPPASSWORD,
+		e.MAIL,
+		e.MAILAPPPASSWORD,
 		"smtp.gmail.com",
 	)
 	smtp.SendMail(
 		"smtp.gmail.com:587",
 		mailAuth,
-		*e.MAIL,
-		[]string{*to},
+		e.MAIL,
+		[]string{to},
 		[]byte(message),
 	)
 }

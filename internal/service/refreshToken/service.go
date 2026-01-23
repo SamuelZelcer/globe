@@ -12,8 +12,8 @@ import (
 type Service interface {
 	Update(
 		ctx context.Context,
-		providedRefreshToken *string,
-		providedAccessToken *string,
+		providedRefreshToken string,
+		providedAccessToken string,
 		tokenss *dtos.AuthenticationTokens,
 	) (*JWT.UserClaims, error)
 }

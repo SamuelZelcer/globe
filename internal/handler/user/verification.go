@@ -21,7 +21,7 @@ func (h *handler) Verification(ctx echo.Context) error {
 	if err := ctx.Bind(request); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Bad request"})
 	}
-	if err := h.service.Verification(request, &splitAuthHeader[1]); err != nil {
+	if err := h.service.Verification(request, splitAuthHeader[1]); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, "User was successfully created")
@@ -36,7 +36,7 @@ func (h *handler) GetNewCode(ctx echo.Context) error {
 	if len(splitAuthHeader) != 2 || splitAuthHeader[0] != "Bearer" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid authorization header"})
 	}
-	if err := h.service.GetNewCode(&splitAuthHeader[1]); err != nil {
+	if err := h.service.GetNewCode(splitAuthHeader[1]); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, "new verification code was generated")
@@ -51,7 +51,7 @@ func (h *handler) SendCodeAgain(ctx echo.Context) error {
 	if len(splitAuthHeader) != 2 || splitAuthHeader[0] != "Bearer" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid authorization header"})
 	}
-	if err := h.service.SendCodeAgain(&splitAuthHeader[1]); err != nil {
+	if err := h.service.SendCodeAgain(splitAuthHeader[1]); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return ctx.JSON(http.StatusOK, "email with verification code was sent again")
