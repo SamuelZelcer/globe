@@ -28,7 +28,7 @@ func (s *service) Update(
 	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
 		if request.RefreshToken == "" {
-			return nil, nil, errors.New("Invalid jwt token")
+			return nil, nil, errors.New("Invalid refresh token")
 		}
 
 		// update authentication tokens

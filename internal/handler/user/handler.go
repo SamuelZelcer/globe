@@ -12,6 +12,7 @@ type Handler interface {
 	GetNewCode(ctx echo.Context) error
 	SendCodeAgain(ctx echo.Context) error
 	SignIn(ctx echo.Context) error
+	UpdateUsername(ctx echo.Context) error
 }
 
 type handler struct {

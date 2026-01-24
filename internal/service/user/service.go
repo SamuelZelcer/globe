@@ -18,6 +18,7 @@ type Service interface {
 	GetNewCode(token string) error
 	SendCodeAgain(token string) error
 	SignIn(request *dtos.SignInRequest, ctx context.Context) (*dtos.AuthenticationTokens, error)
+	UpdateUsername(ctx context.Context, request *dtos.UpdateUsernameRequest, token string) error
 }
 
 type service struct {

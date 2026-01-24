@@ -56,7 +56,7 @@ func (s *service) Verification(request *dtos.VerifyUserRequest, token string) er
 	}
 
 	// create user
-	if err := s.userRepository.Create(&user); err != nil {
+	if err := s.userRepository.Save(&user); err != nil {
 		tx.Rollback()
 		return errors.New("Couldn't create user")
 	}

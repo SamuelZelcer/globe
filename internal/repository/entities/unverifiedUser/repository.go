@@ -10,7 +10,6 @@ import (
 type Repository interface {
 	DeleteExpiredUsers(now time.Time)
 	Create(user *entities.UnverifiedUser) (uint64, error)
-	IsUsernameOrEmailAlreadyInUse(username string, email string) bool
 	FindByID(ID uint64, user *entities.UnverifiedUser) error
 	DeleteByID(ID uint64) error
 	UpdateVerificationCode(ID uint64, code *string) error
@@ -36,27 +35,18 @@ func (r *repository) Create(user *entities.UnverifiedUser) (uint64, error) {
 	return user.ID, nil
 }
 
-func (r *repository) IsUsernameOrEmailAlreadyInUse(username string, email string) bool {
-	var count int64
-	err := r.DB.Model(&entities.User{}).Where("username = ? OR email = ?", username, email).Count(&count).Error
-	if err != nil {
-		return false
-	}
-	return count > 0
-}
-
 func (r *repository) FindByID(ID uint64, user *entities.UnverifiedUser) error {
-	return r.DB.First(user, "id = ?", ID).Error
+	return r.DB.First(user, ID).Error
 }
 
 func (r *repository) DeleteByID(ID uint64) error {
-	return r.DB.Delete(&entities.UnverifiedUser{}, " id = ?", ID).Error
+	return r.DB.Delete(&entities.UnverifiedUser{}, ID).Error
 }
 
 func (r *repository) UpdateVerificationCode(ID uint64, newCode *string) error {
-	return r.DB.Model(&entities.UnverifiedUser{}).Where("id = ?", ID).Update("code", newCode).Error
+	return r.DB.Model(&entities.UnverifiedUser{}).Where(ID).Update("code", newCode).Error
 }
 
 func (r *repository) FindCodeByID(ID uint64, code *string) error {
-	return r.DB.Model(&entities.UnverifiedUser{}).Where("id = ?", ID).Select("code").Scan(code).Error
+	return r.DB.Model(&entities.UnverifiedUser{}).Where(ID).Select("code").Scan(code).Error
 }

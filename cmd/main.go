@@ -72,12 +72,20 @@ func main() {
     e.Use(middleware.CORS())
     
     // API
+
     // user
+
+    // authorization & authentication
     e.POST("/user/sign-up", userHandler.SignUp)
+    e.POST("/user/sign-in", userHandler.SignIn)
+    
+    // verification
     e.POST("/user/verification", userHandler.Verification)
     e.POST("/user/verification/get-new-code", userHandler.GetNewCode)
     e.POST("/user/verification/send-code-again", userHandler.SendCodeAgain)
-    e.POST("/user/sign-in", userHandler.SignIn)
+
+    // update
+    e.POST("/user/update/username", userHandler.UpdateUsername)
 
     // product
     e.POST("/product/create", productHandler.Create)

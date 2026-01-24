@@ -40,8 +40,14 @@ func (s *service) SignUp(request *dtos.SignUpRequest) (string, error) {
 	}
 
 	// is user with username or email already exists
-	if is := s.unverifiedUserRepository.IsUsernameOrEmailAlreadyInUse(request.Username, request.Email); is {
-		return  "", errors.New("User with this username or email already exists")
+	isUsernameAlreadyInUse, usernameErr := s.userRepository.IsUsernameAlreadyInUse(request.Username)
+	isEmailAlreadyInUse, emailErr := s.userRepository.IsEmailAlreadyInUse(request.Email)
+	if usernameErr != nil || emailErr != nil {
+		return "", errors.New("Could't check is email or username already in use")
+	} else if (isUsernameAlreadyInUse) {
+		return "", errors.New("Username already in use")
+	} else if (isEmailAlreadyInUse) {
+		return "", errors.New("Email already in use")
 	}
 
 	// hash password

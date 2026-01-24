@@ -32,7 +32,7 @@ func (s *service) Create(
 	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
 		if request.RefreshToken == "" {
-			return nil, errors.New("Invalid jwt token")
+			return nil, errors.New("Invalid refresh token")
 		}
 
 		// update authentication tokens
@@ -58,7 +58,7 @@ func (s *service) Create(
 
 	// find user
 	var user entities.User
-	if err := s.userRepository.FindByiD(claims.UserID, &user); err != nil {
+	if err := s.userRepository.FindByID(claims.UserID, &user); err != nil {
 		return nil, errors.New("couldn't find user")
 	}
 	

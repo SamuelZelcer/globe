@@ -30,11 +30,11 @@ func (r *repository) Save(product *entities.Product) (uint64, error) {
 }
 
 func (r *repository) FindByID(ID uint64, product *entities.Product) error {
-	return r.DB.First(product, "id = ?", ID).Preload("User").Error
+	return r.DB.First(product, ID).Preload("User").Error
 }
 
 func (r *repository) DeleteByID(ID uint64) error {
-	return r.DB.Unscoped().Delete(&entities.Product{}, "id = ?", ID).Error
+	return r.DB.Unscoped().Delete(&entities.Product{}, ID).Error
 }
 
 func (r *repository) FindProductsForSearch(name string, offset int, products *[]entities.Product) error {
