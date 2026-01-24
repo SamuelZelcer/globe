@@ -14,7 +14,7 @@ type Service interface {
 		ctx context.Context,
 		providedRefreshToken string,
 		providedAccessToken string,
-		tokenss *dtos.AuthenticationTokens,
+		tokens *dtos.AuthenticationTokens,
 	) (*JWT.UserClaims, error)
 	Create(ctx context.Context, userID uint64) (string, error)
 }

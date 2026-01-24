@@ -13,6 +13,7 @@ type Repository interface {
 	IsUsernameAlreadyInUse(username string) (bool, error)
 	IsEmailAlreadyInUse(email string) (bool, error)
 	FindUserByIDWithAllHisProducts(ID uint64, user *entities.User) error
+	UpdateEmailByID(ID uint64, email string) error
 }
 
 type repository struct {
@@ -49,4 +50,8 @@ func (r *repository) IsEmailAlreadyInUse(email string) (bool, error) {
 
 func (r *repository) FindUserByIDWithAllHisProducts(ID uint64, user *entities.User) error {
 	return r.DB.Preload("Products").First(user, ID).Error
+}
+
+func (r *repository) UpdateEmailByID(ID uint64, email string) error {
+	return r.DB.Model(&entities.User{}).Where(ID).Update("email", email).Error
 }

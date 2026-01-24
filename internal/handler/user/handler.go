@@ -13,6 +13,8 @@ type Handler interface {
 	SendCodeAgain(ctx echo.Context) error
 	SignIn(ctx echo.Context) error
 	UpdateUsername(ctx echo.Context) error
+	UpdateEmail(ctx echo.Context) error
+	VerifyNewEmail(ctx echo.Context) error
 }
 
 type handler struct {

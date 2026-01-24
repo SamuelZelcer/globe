@@ -67,14 +67,11 @@ func main() {
     userHandler := userHandler.Init(userService)
     productHandler := productHandler.Init(productService)
 
+    // initialize HTTP server
     e := echo.New()
     e.Use(middleware.RequestLogger())
     e.Use(middleware.CORS())
     
-    // API
-
-    // user
-
     // authorization & authentication
     e.POST("/user/sign-up", userHandler.SignUp)
     e.POST("/user/sign-in", userHandler.SignIn)
@@ -86,6 +83,8 @@ func main() {
 
     // update
     e.POST("/user/update/username", userHandler.UpdateUsername)
+    e.POST("/user/update/email", userHandler.UpdateEmail)
+    e.POST("/user/update/email/verify", userHandler.VerifyNewEmail)
 
     // product
     e.POST("/product/create", productHandler.Create)

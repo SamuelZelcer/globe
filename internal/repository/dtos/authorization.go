@@ -6,7 +6,7 @@ type SignUpRequest struct {
 	Password string `json:"password"`
 }
 
-type VerifyUserRequest struct {
+type VerifyEmailRequest struct {
 	Code string `json:"code"`
 }
 

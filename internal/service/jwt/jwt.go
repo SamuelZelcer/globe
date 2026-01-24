@@ -10,7 +10,7 @@ import (
 )
 
 type Manager interface {
-	Create(userID uint64, username string, duration time.Duration) (string, error)
+	Create(userID uint64, email string, duration time.Duration) (string, error)
 	Validate(tokenStr string) (*UserClaims, error)
 	ValidateWithoutExpiration(tokenStr string) (*UserClaims, error)
 }

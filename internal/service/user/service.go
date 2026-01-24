@@ -14,11 +14,25 @@ import (
 
 type Service interface {
 	SignUp(request *dtos.SignUpRequest) (string, error)
-	Verification(request *dtos.VerifyUserRequest, token string) error
+	Verification(request *dtos.VerifyEmailRequest, token string) error
 	GetNewCode(token string) error
 	SendCodeAgain(token string) error
 	SignIn(request *dtos.SignInRequest, ctx context.Context) (*dtos.AuthenticationTokens, error)
-	UpdateUsername(ctx context.Context, request *dtos.UpdateUsernameRequest, token string) error
+	UpdateUsername(
+		ctx context.Context,
+		request *dtos.UpdateUsernameRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
+	UpdateEmail(
+		ctx context.Context,
+		request *dtos.UpdateEmailRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
+	VerifyNewEmail(
+		ctx context.Context,
+		request *dtos.VerifyNewEmailRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
 }
 
 type service struct {

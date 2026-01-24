@@ -17,7 +17,7 @@ func (h *handler) Verification(ctx echo.Context) error {
 	if len(splitAuthHeader) != 2 || splitAuthHeader[0] != "Bearer" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid authorization header"})
 	}
-	request := &dtos.VerifyUserRequest{}
+	request := &dtos.VerifyEmailRequest{}
 	if err := ctx.Bind(request); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Bad request"})
 	}

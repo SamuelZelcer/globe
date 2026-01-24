@@ -9,12 +9,16 @@ import (
 	"regexp"
 )
 
-func (s *service) UpdateUsername(ctx context.Context, request *dtos.UpdateUsernameRequest, token string) error {
+func (s *service) UpdateUsername(
+	ctx context.Context,
+	request *dtos.UpdateUsernameRequest,
+	token string,
+) (*dtos.AuthenticationTokens, error) {
 	// validate request
 	if request.Username == "" ||
 	len(request.Username) < 4 ||
 	len(request.Username) > 60 {
-		return errors.New("Invalid request")
+		return nil, errors.New("Invalid request")
 	}
 
 	// validate token
@@ -22,28 +26,28 @@ func (s *service) UpdateUsername(ctx context.Context, request *dtos.UpdateUserna
 	claims, err := s.jwtManager.Validate(token)
 	if err != nil {
 		if request.RefreshToken == "" {
-			return errors.New("Invalid refresh token")
+			return nil, errors.New("Invalid refresh token")
 		}
 
 		// update authentication tokens
 		claims, err = s.refreshTokenService.Update(ctx, request.RefreshToken, token, &tokens)
 		if err != nil {
-			return errors.New(err.Error())
+			return nil, errors.New(err.Error())
 		}
 	}
 
 	// validate username
 	matched, err := regexp.MatchString(`[!@#$%^&*()]`, request.Username)
 	if err != nil || matched {
-		return errors.New("Invalid username")
+		return nil, errors.New("Invalid username")
 	}
 
 	// is username already in use
 	isUsernameAlreadyInUse, err := s.userRepository.IsUsernameAlreadyInUse(request.Username)
 	if err != nil {
-		return errors.New("Couldn't check is username already in use")
+		return nil, errors.New("Couldn't check is username already in use")
 	} else if (isUsernameAlreadyInUse) {
-		return errors.New("Username already in use")
+		return nil, errors.New("Username already in use")
 	}
 
 	// user
@@ -51,12 +55,12 @@ func (s *service) UpdateUsername(ctx context.Context, request *dtos.UpdateUserna
 
 	// find user
 	if err := s.userRepository.FindUserByIDWithAllHisProducts(claims.UserID, &user); err != nil {
-		return errors.New("Couldn't find user")
+		return nil, errors.New("Couldn't find user")
 	}
 
 	// delete related products from cache
 	for i := range user.Products {
-		go s.redis.DEL(ctx, fmt.Sprintf("products:%d", user.Products[i].ID))
+		s.redis.DEL(ctx, fmt.Sprintf("products:%d", user.Products[i].ID))
 	}
 
 	// update username
@@ -64,8 +68,11 @@ func (s *service) UpdateUsername(ctx context.Context, request *dtos.UpdateUserna
 
 	// update user in database
 	if err := s.userRepository.Save(&user); err != nil {
-		return errors.New("Couldn't save new user to database")
+		return nil, errors.New("Couldn't save updated user to database")
 	}
 
-	return nil
+	return &dtos.AuthenticationTokens{
+		RefreshToken: tokens.RefreshToken,
+		AccessToken: tokens.AccessToken,
+	}, nil
 }

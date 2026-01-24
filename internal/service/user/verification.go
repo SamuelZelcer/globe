@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func (s *service) Verification(request *dtos.VerifyUserRequest, token string) error {
+func (s *service) Verification(request *dtos.VerifyEmailRequest, token string) error {
 	// validate request
 	if request.Code == "" ||
 	len(request.Code) != 6 {

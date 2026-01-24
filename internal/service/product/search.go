@@ -52,14 +52,14 @@ func (s *service) Search(ctx context.Context, request *dtos.SearchRequest) (*dto
 
 	// find each product
 	for _, v := range productIDs {
-		product := &entities.Product{}
+		var product entities.Product
 
 		// find product in cache
 		productJSON, err := s.redis.GET(ctx, fmt.Sprintf("product:%d", v))
 		if err != nil {
 
 			// find product in database
-			if err := s.productRepository.FindByID(v, product); err != nil {
+			if err := s.productRepository.FindByID(v, &product); err != nil {
 				
 				// delete outdated page from redis
 				if err := s.redis.DEL(
@@ -105,7 +105,7 @@ func (s *service) Search(ctx context.Context, request *dtos.SearchRequest) (*dto
 
 		// parse productJSON if find
 		if productJSON != "" && productJSON != "null" {
-			if err := json.Unmarshal([]byte(productJSON), product); err != nil {
+			if err := json.Unmarshal([]byte(productJSON), &product); err != nil {
 				return nil, errors.New("Couldn't parse product from JSON")
 			}
 		}
