@@ -16,6 +16,7 @@ type Service interface {
 		providedAccessToken string,
 		tokenss *dtos.AuthenticationTokens,
 	) (*JWT.UserClaims, error)
+	Create(ctx context.Context, userID uint64) (string, error)
 }
 
 type service struct {

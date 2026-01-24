@@ -51,7 +51,7 @@ func main() {
         jwtManager,
         transactions,
         redisRepository,
-        refreshTokenRepository,
+        refreshTokenService,
     )
     productService := productService.Init(
         productRepository,

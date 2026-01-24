@@ -9,8 +9,6 @@ import (
 	JWT "globe/internal/service/jwt"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 func (s *service) Update(
@@ -53,26 +51,10 @@ func (s *service) Update(
 		return nil, errors.New("Token is invalid or expired")
 	}
 
-	// new refresh token
-	newRefreshToken := &entities.RefreshToken{
-		ID: claims.UserID,
-		Token: uuid.NewString(),
-		Expired: time.Now().Add(time.Hour*168),
-	}
-
-	// save new refresh token to redis
-	if err := s.redis.SET(
-		ctx,
-		fmt.Sprintf("refreshtoken:%d", refreshToken.ID),
-		fmt.Sprintf("%s_%s", newRefreshToken.Token, newRefreshToken.Expired.Format(time.RFC3339)),
-		time.Hour*24,
-	); err != nil {
-		return nil, errors.New("Couldn't store refresh token in redis")
-	}
-
-	// save new refresh token to database
-	if err := s.refreshTokenRepository.Save(newRefreshToken); err != nil {
-		return nil, errors.New("Couldn't save refresh token to DB")
+	// create new refresh token
+	newRefreshToken, err := s.Create(ctx, claims.UserID)
+	if err != nil {
+		return nil, errors.New("Couldn't create new refresh token")
 	}
 
 	// new access token
@@ -80,7 +62,7 @@ func (s *service) Update(
 	if err != nil {
 		return nil, errors.New("Couldn't generate new access token")
 	}
-	tokens.RefreshToken = newRefreshToken.Token
+	tokens.RefreshToken = newRefreshToken
 	tokens.AccessToken = newAccessToken
 	return claims, nil
 }

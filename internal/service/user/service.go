@@ -3,13 +3,13 @@ package userService
 import (
 	"context"
 	"globe/internal/repository/dtos"
-	"globe/internal/repository/entities/refreshToken"
 	"globe/internal/repository/entities/unverifiedUser"
 	"globe/internal/repository/entities/user"
 	"globe/internal/repository/redis"
 	"globe/internal/repository/transactions"
 	"globe/internal/service/email"
 	JWT "globe/internal/service/jwt"
+	refreshTokenService "globe/internal/service/refreshToken"
 )
 
 type Service interface {
@@ -27,7 +27,7 @@ type service struct {
 	jwtManager JWT.Manager
 	transactions transactions.Transactions
 	redis redis.Cache
-	refreshTokenRepository refreshToken.Repository
+	refreshTokenService refreshTokenService.Service
 }
 
 func Init(
@@ -37,7 +37,7 @@ func Init(
 	jwtManager JWT.Manager,
 	transactions transactions.Transactions,
 	redis redis.Cache,
-	refreshTokenRepository refreshToken.Repository,
+	refreshTokenService refreshTokenService.Service,
 ) Service {
 	return &service{
 		userRepository: userRepository,
@@ -46,6 +46,6 @@ func Init(
 		jwtManager: jwtManager,
 		transactions: transactions,
 		redis: redis,
-		refreshTokenRepository: refreshTokenRepository,
+		refreshTokenService: refreshTokenService,
 	}
 }

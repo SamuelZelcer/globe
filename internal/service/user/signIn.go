@@ -3,13 +3,11 @@ package userService
 import (
 	"context"
 	"errors"
-	"fmt"
 	"globe/internal/repository/dtos"
 	"globe/internal/repository/entities"
 	"net/mail"
 	"time"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -40,26 +38,10 @@ func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dto
 		return nil, errors.New("Invalid password provided")
 	}
 
-	// refresh token
-	refreshToken := entities.RefreshToken{
-		ID: user.ID,
-		Token: uuid.NewString(),
-		Expired: time.Now().Add(time.Hour*168),
-	}
-
-	// save refresh token to DB
-	if err := s.refreshTokenRepository.Save(&refreshToken); err != nil {
+	// create refresh token
+	refreshToken, err := s.refreshTokenService.Create(ctx, user.ID)
+	if err != nil {
 		return nil, errors.New("Couldn't create refresh token")
-	}
-
-	// save refresh token to redis
-	if err := s.redis.SET(
-		ctx,
-		fmt.Sprintf("refreshtoken:%d", refreshToken.ID),
-		fmt.Sprintf("%s_%s", refreshToken.Token, refreshToken.Expired.Format(time.RFC3339)),
-		time.Hour*24,
-	); err != nil {
-		return nil, errors.New("Couldn't store refresh token in redis")
 	}
 
 	// access token
@@ -69,7 +51,7 @@ func (s *service) SignIn(request *dtos.SignInRequest, ctx context.Context) (*dto
 	}
 
 	return &dtos.AuthenticationTokens{
-		RefreshToken: refreshToken.Token,
+		RefreshToken: refreshToken,
 		AccessToken: accessToken,
 	}, nil
 }
