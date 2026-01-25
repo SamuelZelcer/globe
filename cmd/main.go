@@ -84,7 +84,9 @@ func main() {
     // update
     e.POST("/user/update/username", userHandler.UpdateUsername)
     e.POST("/user/update/email", userHandler.UpdateEmail)
-    e.POST("/user/update/email/verify", userHandler.VerifyNewEmail)
+    e.POST("/user/update/email/verification", userHandler.NewEmailVerification)
+    e.POST("/user/update/password", userHandler.UpdatePassword)
+    e.POST("/user/update/password/verification", userHandler.NewPasswordVerification)
 
     // product
     e.POST("/product/create", productHandler.Create)

@@ -9,14 +9,13 @@ import (
 	"time"
 )
 
-func (s *service) VerifyNewEmail(
+func (s *service) NewEmailVerification(
 	ctx context.Context,
-	request *dtos.VerifyNewEmailRequest,
+	request *dtos.VerificationRequest,
 	token string,
 ) (*dtos.AuthenticationTokens, error) {
 	// validate request
-	if request.Email == "" ||
-	request.Code == "" ||
+	if request.Code == "" ||
 	len(request.Code) != 6 {
 		return nil, errors.New("Invalid request")
 	}
@@ -48,18 +47,13 @@ func (s *service) VerifyNewEmail(
 		return nil, errors.New("Couldn't parse new email from cache")
 	}
 
-	// compare provided email and verification code
-	if request.Email != newEmailAndCode.Email || request.Code != newEmailAndCode.Code {
-		return nil, errors.New("Invalid email or verification code")
-	}
-
 	// update user in database
-	if err := s.userRepository.UpdateEmailByID(claims.UserID, request.Email); err != nil {
+	if err := s.userRepository.UpdateEmailByID(claims.UserID, newEmailAndCode.Email); err != nil {
 		return nil, errors.New("Couldn't save updated user to database")
 	}
 
 	// update access token
-	newAccessToken, err := s.jwtManager.Create(claims.UserID, request.Email, time.Minute*5)
+	newAccessToken, err := s.jwtManager.Create(claims.UserID, newEmailAndCode.Email, time.Minute*5)
 	if err != nil {
 		return nil, errors.New("Couldn't create new access token")
 	}
@@ -68,8 +62,5 @@ func (s *service) VerifyNewEmail(
 	// delete outdated data from redis
 	s.redis.DEL(ctx, fmt.Sprintf("newemail:%d", claims.UserID))
 
-	return &dtos.AuthenticationTokens{
-		RefreshToken: tokens.RefreshToken,
-		AccessToken: tokens.AccessToken,
-	}, nil
+	return &tokens, nil
 }

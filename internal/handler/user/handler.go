@@ -14,7 +14,9 @@ type Handler interface {
 	SignIn(ctx echo.Context) error
 	UpdateUsername(ctx echo.Context) error
 	UpdateEmail(ctx echo.Context) error
-	VerifyNewEmail(ctx echo.Context) error
+	NewEmailVerification(ctx echo.Context) error
+	UpdatePassword(ctx echo.Context) error
+	NewPasswordVerification(ctx echo.Context) error
 }
 
 type handler struct {

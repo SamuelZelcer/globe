@@ -50,10 +50,8 @@ func (s *service) UpdateUsername(
 		return nil, errors.New("Username already in use")
 	}
 
-	// user
-	var user entities.User
-
 	// find user
+	var user entities.User
 	if err := s.userRepository.FindUserByIDWithAllHisProducts(claims.UserID, &user); err != nil {
 		return nil, errors.New("Couldn't find user")
 	}
@@ -70,9 +68,5 @@ func (s *service) UpdateUsername(
 	if err := s.userRepository.Save(&user); err != nil {
 		return nil, errors.New("Couldn't save updated user to database")
 	}
-
-	return &dtos.AuthenticationTokens{
-		RefreshToken: tokens.RefreshToken,
-		AccessToken: tokens.AccessToken,
-	}, nil
+	return &tokens, nil
 }

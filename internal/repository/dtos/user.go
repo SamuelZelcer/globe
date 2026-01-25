@@ -10,9 +10,8 @@ type UpdateEmailRequest struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
-type VerifyNewEmailRequest struct {
+type VerificationRequest struct {
 	Code string `json:"code"`
-	Email string `json:"email"`
 	RefreshToken string `json:"refreshToken"`
 }
 
@@ -22,6 +21,12 @@ type NewEmailAndVerificationCode struct {
 }
 
 type UpdatePasswordRequest struct {
-	Passowrd string `json:"passowrd"`
+	NewPassowrd string `json:"newPassword"`
+	Passowrd string `json:"password"`
 	RefreshToken string `json:"refreshToken"`
+}
+
+type NewPasswordAndVerificationCode struct {
+	Code string `json:"code"`
+	NewPassowrd string `json:"newPassword"`
 }

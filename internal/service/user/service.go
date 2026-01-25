@@ -14,7 +14,7 @@ import (
 
 type Service interface {
 	SignUp(request *dtos.SignUpRequest) (string, error)
-	Verification(request *dtos.VerifyEmailRequest, token string) error
+	Verification(request *dtos.SignUpVerification, token string) error
 	GetNewCode(token string) error
 	SendCodeAgain(token string) error
 	SignIn(request *dtos.SignInRequest, ctx context.Context) (*dtos.AuthenticationTokens, error)
@@ -28,9 +28,19 @@ type Service interface {
 		request *dtos.UpdateEmailRequest,
 		token string,
 	) (*dtos.AuthenticationTokens, error)
-	VerifyNewEmail(
+	NewEmailVerification(
 		ctx context.Context,
-		request *dtos.VerifyNewEmailRequest,
+		request *dtos.VerificationRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
+	UpdatePassword(
+		ctx context.Context,
+		request *dtos.UpdatePasswordRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
+	NewPasswordVerification(
+		ctx context.Context,
+		request *dtos.VerificationRequest,
 		token string,
 	) (*dtos.AuthenticationTokens, error)
 }
