@@ -102,17 +102,24 @@ func (s *service) Update(
 		product.Description = request.Description
 	}
 
-	// parse product to JSON
-	newProductJSON, err := json.Marshal(product)
-	if err != nil {
-		return nil, nil,  errors.New("Couldn't parse updated product to JSON")
-	}
-
 	// save updated product to database
 	if _, err := s.productRepository.Save(&product); err != nil {
 		return nil, nil, errors.New("Couldn't save updated product")
 	}
 	
+	// parse product to JSON
+	newProductJSON, err := json.Marshal(dtos.CachedProduct{
+		Name: product.Name,
+		OriginalName: product.OriginalName,
+		Price: product.Price,
+		Description: product.Description,
+		Owner: product.User.ID,
+		OwnerName: product.User.Username,
+	})
+	if err != nil {
+		return nil, nil,  errors.New("Couldn't parse updated product to JSON")
+	}
+
 	// save updated product to redis
 	if err := s.redis.SET(
 		ctx,
@@ -123,13 +130,10 @@ func (s *service) Update(
 		return nil, nil,  errors.New("Couldn't save updated product to redis")
 	}
 
-	// convert price
-	displayPrice := fmt.Sprintf("%.2f", float64(product.Price)/100)
-
 	return &tokens,
 	&dtos.UpdateProductResponce{
 		Name: product.OriginalName,
-		Price: displayPrice,
+		Price: fmt.Sprintf("%.2f", float64(product.Price)/100),
 		Description: product.Description,
 	}, nil
 }

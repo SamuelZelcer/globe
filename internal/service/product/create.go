@@ -79,7 +79,14 @@ func (s *service) Create(
 	}
 	
 	// parse product to JSON
-	productJSON, err := json.Marshal(product)
+	productJSON, err := json.Marshal(dtos.CachedProduct{
+		Name: product.Name,
+		OriginalName: product.OriginalName,
+		Price: product.Price,
+		Description: product.Description,
+		Owner: user.ID,
+		OwnerName: user.Username,
+	})
 	if err != nil {
 		return nil, errors.New("Couldn't parse product to JSON")
 	}

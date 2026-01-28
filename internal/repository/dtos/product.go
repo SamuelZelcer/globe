@@ -15,6 +15,12 @@ type UpdateProductRequest struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+type UpdateProductResponce struct {
+	Name string `json:"name"`
+	Price string `json:"price"`
+	Description string `json:"description"`
+}
+
 type DeleteProductRequest struct {
 	ProductID uint64 `json:"productID"`
 	RefreshToken string `json:"refreshToken"`
@@ -23,12 +29,6 @@ type DeleteProductRequest struct {
 type SearchRequest struct {
 	Name string `json:"name"`
 	Page uint32 `json:"page"`
-}
-
-type UpdateProductResponce struct {
-	Name string `json:"name"`
-	Price string `json:"price"`
-	Description string `json:"description"`
 }
 
 type SearchProduct struct {
@@ -42,4 +42,13 @@ type SearchProductResponse struct {
 	TotalAmountOfPages int64 `json:"totalAmountOfPages"`
 	CurrentPage uint32 `json:"currentPage"`
 	Products *[]SearchProduct `json:"products"`
+}
+
+type CachedProduct struct {
+	Name string `json:"name"`
+	OriginalName string `json:"originalName"`
+	Price uint64 `json:"price"`
+	Description string `json:"description"`
+	Owner uint64 `json:"owner"`
+	OwnerName string `json:"ownerName"`
 }

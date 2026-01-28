@@ -54,6 +54,5 @@ func (s *service) NewPasswordVerification(
 	// delete outdated data from redis
 	s.redis.DEL(ctx, fmt.Sprintf("newpassword:%d", claims.UserID))
 
-
 	return &tokens, nil
 }

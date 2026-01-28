@@ -57,8 +57,12 @@ func (s *service) UpdateUsername(
 	}
 
 	// delete related products from cache
+	var keys []string
 	for i := range user.Products {
-		s.redis.DEL(ctx, fmt.Sprintf("products:%d", user.Products[i].ID))
+		keys = append(keys, fmt.Sprintf("product:%d", user.Products[i].ID))
+	}
+	if err := s.redis.DELMORETHEN1(ctx, keys); err != nil {
+		return nil, errors.New("Couldn't delete outdated data from redis")
 	}
 
 	// update username

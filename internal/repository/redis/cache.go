@@ -27,6 +27,14 @@ type Cache interface {
 		key string,
 		expiration time.Duration,
 	) error
+	DELMORETHEN1(
+		ctx context.Context,
+		keys []string,
+	) error
+	GETMORETHEN1(
+		ctx context.Context,
+		keys []string,
+	) ([]any, error)
 }
 
 type cache struct {
@@ -78,4 +86,21 @@ func (c *cache) EXPIRE(
 		key,
 		expiration,
 	).Err()
+}
+
+func (c *cache) DELMORETHEN1(
+	ctx context.Context,
+	keys []string,
+) error {
+	return c.client.Del(
+		ctx,
+		keys...
+	).Err()
+}
+
+func (c *cache) GETMORETHEN1(
+	ctx context.Context,
+	keys []string,
+) ([]any, error) {
+	return c.client.MGet(ctx, keys...).Result()
 }
