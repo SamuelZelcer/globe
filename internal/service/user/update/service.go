@@ -1,4 +1,4 @@
-package userService
+package userUpdateService
 
 import (
 	"context"
@@ -11,20 +11,37 @@ import (
 	"globe/internal/service/email"
 	JWT "globe/internal/service/jwt"
 	refreshTokenService "globe/internal/service/refreshToken"
-	userUpdate "globe/internal/service/user/update"
 )
 
-type Service interface {
-	userUpdate.UserUpdateService
-	SignUp(request *dtos.SignUpRequest) (string, error)
-	Verification(request *dtos.SignUpVerification, token string) error
-	GetNewCode(token string) error
-	SendCodeAgain(token string) error
-	SignIn(request *dtos.SignInRequest, ctx context.Context) (*dtos.AuthenticationTokens, error)
+type UserUpdateService interface {
+	UpdateUsername(
+		ctx context.Context,
+		request *dtos.UpdateUsernameRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
+	UpdateEmail(
+		ctx context.Context,
+		request *dtos.UpdateEmailRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
+	NewEmailVerification(
+		ctx context.Context,
+		request *dtos.VerificationRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
+	UpdatePassword(
+		ctx context.Context,
+		request *dtos.UpdatePasswordRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
+	NewPasswordVerification(
+		ctx context.Context,
+		request *dtos.VerificationRequest,
+		token string,
+	) (*dtos.AuthenticationTokens, error)
 }
 
-type service struct {
-	userUpdate.UserUpdateService
+type userUpdateService struct {
 	userRepository user.Repository
 	unverifiedUserRepository unverifiedUser.Repository
 	email email.Email
@@ -34,9 +51,8 @@ type service struct {
 	refreshTokenService refreshTokenService.Service
 }
 
-func Init(d *serviceDTOs.UserDependencies) Service {
-	return &service{
-		UserUpdateService: userUpdate.Init(d),
+func Init(d *serviceDTOs.UserDependencies) UserUpdateService {
+	return &userUpdateService{
 		userRepository: d.UserRepository,
 		unverifiedUserRepository: d.UnverifiedUserRepository,
 		email: d.Email,

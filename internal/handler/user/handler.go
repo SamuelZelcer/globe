@@ -1,28 +1,29 @@
 package userHandler
 
 import (
+	userUpdateHandler "globe/internal/handler/user/update"
 	userService "globe/internal/service/user"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Handler interface {
+	userUpdateHandler.UpdateHandler
 	SignUp(ctx echo.Context) error
 	Verification(ctx echo.Context) error
 	GetNewCode(ctx echo.Context) error
 	SendCodeAgain(ctx echo.Context) error
 	SignIn(ctx echo.Context) error
-	UpdateUsername(ctx echo.Context) error
-	UpdateEmail(ctx echo.Context) error
-	NewEmailVerification(ctx echo.Context) error
-	UpdatePassword(ctx echo.Context) error
-	NewPasswordVerification(ctx echo.Context) error
 }
 
 type handler struct {
+	userUpdateHandler.UpdateHandler
 	service userService.Service
 }
 
 func Init(service userService.Service) Handler {
-	return &handler{service: service}
+	return &handler{
+		UpdateHandler: userUpdateHandler.Init(service),
+		service: service,
+	}
 }

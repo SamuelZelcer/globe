@@ -1,4 +1,4 @@
-package userService
+package userUpdateService
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"globe/internal/repository/dtos"
 )
 
-func (s *service) NewPasswordVerification(
+func (s *userUpdateService) NewPasswordVerification(
 	ctx context.Context,
 	request *dtos.VerificationRequest,
 	token string,

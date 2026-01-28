@@ -3,10 +3,10 @@ package productService
 import (
 	"context"
 	"globe/internal/repository/dtos"
+	serviceDtos "globe/internal/repository/dtos/service"
 	"globe/internal/repository/entities/product"
 	"globe/internal/repository/entities/user"
 	"globe/internal/repository/redis"
-	"globe/internal/repository/transactions"
 	"globe/internal/service/email"
 	JWT "globe/internal/service/jwt"
 	"globe/internal/service/product/search"
@@ -44,36 +44,19 @@ type service struct {
 	productRepository product.Repository
 	userRepository user.Repository
 	email email.Email
-	transactions transactions.Transactions
 	redis redis.Cache
 	jwtManager JWT.Manager
 	refreshTokenService refreshTokenService.Service
 }
 
-func Init(
-	productRepository product.Repository,
-	userRepository user.Repository,
-	email email.Email,
-	transactions transactions.Transactions,
-	redis redis.Cache,
-	jwtManager JWT.Manager,
-	refreshTokenService refreshTokenService.Service,
-) Service {
+func Init(d *serviceDtos.ProductDependencies) Service {
 	return &service{
-		SearchService: search.Init(
-			productRepository,
-			userRepository,
-			email,
-			redis,
-			jwtManager,
-			refreshTokenService,
-		),
-		productRepository: productRepository,
-		userRepository: userRepository,
-		email: email,
-		transactions: transactions,
-		redis: redis,
-		jwtManager: jwtManager,
-		refreshTokenService: refreshTokenService,
+		SearchService: search.Init(d),
+		productRepository: d.ProductRepository,
+		userRepository: d.UserRepository,
+		email: d.Email,
+		redis: d.Redis,
+		jwtManager: d.JWTManager,
+		refreshTokenService: d.RefreshTokenService,
 	}
 }

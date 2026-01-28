@@ -4,6 +4,7 @@ import (
 	productHandler "globe/internal/handler/product"
 	userHandler "globe/internal/handler/user"
 	"globe/internal/repository"
+	serviceDTOs "globe/internal/repository/dtos/service"
 	"globe/internal/repository/entities/product"
 	"globe/internal/repository/entities/refreshToken"
 	"globe/internal/repository/entities/unverifiedUser"
@@ -45,22 +46,25 @@ func main() {
         redisRepository,
     )
     userService := userService.Init(
-        userRepository,
-        unverifiedUserRepository,
-        email,
-        jwtManager,
-        transactions,
-        redisRepository,
-        refreshTokenService,
+        &serviceDTOs.UserDependencies{
+            UserRepository: userRepository,
+            UnverifiedUserRepository: unverifiedUserRepository,
+            Email: email,
+            JWTManager: jwtManager,
+            Transactions: transactions,
+            Redis: redisRepository,
+            RefreshTokenService: refreshTokenService,
+        },
     )
     productService := productService.Init(
-        productRepository,
-        userRepository,
-        email,
-        transactions,
-        redisRepository,
-        jwtManager,
-        refreshTokenService,
+        &serviceDTOs.ProductDependencies{
+            ProductRepository: productRepository,
+            UserRepository: userRepository,
+            Email: email,
+            Redis: redisRepository,
+            JWTManager: jwtManager,
+            RefreshTokenService: refreshTokenService,
+        },
     )
 
     // handler

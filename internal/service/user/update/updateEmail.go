@@ -1,4 +1,4 @@
-package userService
+package userUpdateService
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (s *service) UpdateEmail(
+func (s *userUpdateService) UpdateEmail(
 	ctx context.Context,
 	request *dtos.UpdateEmailRequest,
 	token string,

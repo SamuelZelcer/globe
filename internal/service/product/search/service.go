@@ -3,6 +3,7 @@ package search
 import (
 	"context"
 	"globe/internal/repository/dtos"
+	serviceDTOs "globe/internal/repository/dtos/service"
 	"globe/internal/repository/entities/product"
 	"globe/internal/repository/entities/user"
 	"globe/internal/repository/redis"
@@ -29,20 +30,13 @@ type searchService struct {
 	refreshTokenService refreshTokenService.Service
 }
 
-func Init(
-	productRepository product.Repository,
-	userRepository user.Repository,
-	email email.Email,
-	redis redis.Cache,
-	jwtManager JWT.Manager,
-	refreshTokenService refreshTokenService.Service,
-) SearchService {
+func Init(d *serviceDTOs.ProductDependencies) SearchService {
 	return &searchService{
-		productRepository: productRepository,
-		userRepository: userRepository,
-		email: email,
-		redis: redis,
-		jwtManager: jwtManager,
-		refreshTokenService: refreshTokenService,
+		productRepository: d.ProductRepository,
+		userRepository: d.UserRepository,
+		email: d.Email,
+		redis: d.Redis,
+		jwtManager: d.JWTManager,
+		refreshTokenService: d.RefreshTokenService,
 	}
 }

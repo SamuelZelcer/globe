@@ -1,4 +1,4 @@
-package userService
+package userUpdateService
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (s *service) NewEmailVerification(
+func (s *userUpdateService) NewEmailVerification(
 	ctx context.Context,
 	request *dtos.VerificationRequest,
 	token string,

@@ -1,4 +1,4 @@
-package userService
+package userUpdateService
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *service) UpdatePassword(
+func (s *userUpdateService) UpdatePassword(
 	ctx context.Context,
 	request *dtos.UpdatePasswordRequest,
 	token string,

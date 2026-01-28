@@ -1,4 +1,4 @@
-package userService
+package userUpdateService
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-func (s *service) UpdateUsername(
+func (s *userUpdateService) UpdateUsername(
 	ctx context.Context,
 	request *dtos.UpdateUsernameRequest,
 	token string,
